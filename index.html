@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -7,34 +7,70 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
 body{
   font-family:Arial,sans-serif;
   background:#f5f7f8;
   color:#17221b;
+  padding-bottom:80px;
 }
+
 header{
   background:#0b7a3b;
   color:white;
   padding:22px 18px 28px;
   border-radius:0 0 24px 24px;
 }
-.logo{font-size:28px;font-weight:800}
-.subtitle{margin-top:6px;opacity:.9}
+
+.logo{
+  font-size:28px;
+  font-weight:800;
+}
+
+.subtitle{
+  margin-top:6px;
+  opacity:.9;
+}
+
 .search{
   margin-top:20px;
   background:white;
   border-radius:14px;
   padding:14px;
-  color:#777;
+  display:flex;
+  gap:8px;
 }
-.container{padding:20px 16px}
-h2{margin-bottom:14px}
+
+.search input{
+  width:100%;
+  border:0;
+  outline:0;
+  font-size:15px;
+}
+
+.search button{
+  border:0;
+  background:#0b7a3b;
+  color:white;
+  border-radius:10px;
+  padding:8px 12px;
+}
+
+.container{
+  padding:20px 16px;
+}
+
+h2{
+  margin-bottom:14px;
+}
+
 .categories{
   display:flex;
   gap:10px;
   overflow-x:auto;
   margin-bottom:25px;
 }
+
 .cat{
   background:white;
   padding:13px 16px;
@@ -42,17 +78,20 @@ h2{margin-bottom:14px}
   white-space:nowrap;
   box-shadow:0 2px 8px #0001;
 }
+
 .cards{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:14px;
 }
+
 .card{
   background:white;
   border-radius:16px;
   overflow:hidden;
   box-shadow:0 3px 12px #0001;
 }
+
 .photo{
   height:120px;
   background:#dcefe4;
@@ -61,26 +100,38 @@ h2{margin-bottom:14px}
   justify-content:center;
   font-size:42px;
 }
-.info{padding:12px}
+
+.info{
+  padding:12px;
+}
+
 .price{
   color:#0b7a3b;
   font-weight:800;
   margin:7px 0;
 }
-.location{font-size:13px;color:#777}
-button{
+
+.location{
+  font-size:13px;
+  color:#777;
+}
+
+.hidden{
+  display:none;
+}
+
+.add{
+  width:100%;
+  margin:25px 0;
   border:0;
   background:#0b7a3b;
   color:white;
-  padding:14px 18px;
+  padding:15px;
   border-radius:13px;
   font-weight:bold;
-}
-.add{
-  width:100%;
-  margin:20px 0;
   font-size:16px;
 }
+
 nav{
   position:fixed;
   bottom:0;
@@ -92,8 +143,17 @@ nav{
   padding:14px 5px;
   box-shadow:0 -2px 12px #0002;
 }
-nav div{text-align:center;font-size:13px}
-nav span{display:block;font-size:22px;margin-bottom:3px}
+
+nav div{
+  text-align:center;
+  font-size:13px;
+}
+
+nav span{
+  display:block;
+  font-size:22px;
+  margin-bottom:3px;
+}
 </style>
 </head>
 
@@ -104,7 +164,13 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
   <div class="subtitle">Acheter, vendre et découvrir en Guinée</div>
 
   <div class="search">
-    🔎 Rechercher un produit ou un service...
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Rechercher un produit..."
+      oninput="rechercher()"
+    >
+    <button onclick="rechercher()">🔎</button>
   </div>
 </header>
 
@@ -120,11 +186,11 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
     <div class="cat">💼 Services</div>
   </div>
 
-  <h2>Annonces populaires</h2>
+  <h2>Annonces</h2>
 
-  <div class="cards">
+  <div class="cards" id="annonces">
 
-    <div class="card">
+    <div class="card annonce">
       <div class="photo">📱</div>
       <div class="info">
         <b>iPhone</b>
@@ -133,7 +199,7 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card annonce">
       <div class="photo">🚗</div>
       <div class="info">
         <b>Voiture</b>
@@ -142,7 +208,7 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card annonce">
       <div class="photo">🏠</div>
       <div class="info">
         <b>Maison à louer</b>
@@ -151,7 +217,7 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card annonce">
       <div class="photo">👕</div>
       <div class="info">
         <b>Vêtements</b>
@@ -177,5 +243,35 @@ nav span{display:block;font-size:22px;margin-bottom:3px}
 </nav>
 
 <script>
+function rechercher(){
+
+  const recherche =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase()
+    .trim();
+
+  const annonces =
+    document.querySelectorAll(".annonce");
+
+  annonces.forEach(function(annonce){
+
+    const texte =
+      annonce.innerText.toLowerCase();
+
+    if(recherche === "" || texte.includes(recherche)){
+      annonce.classList.remove("hidden");
+    }else{
+      annonce.classList.add("hidden");
+    }
+
+  });
+}
+
 function publier(){
-  alert("La publication d'annonces sera disponible prochainement.
+  alert("La publication d'annonces sera disponible prochainement.");
+}
+</script>
+
+</body>
+</html>
