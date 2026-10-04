@@ -3,154 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalo Guinée</title>
+  <title>Kalo Guinée 🇬🇳</title>
 
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      background: #f5f7f5;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
       color: #222;
     }
 
     header {
-      background: #0b8f45;
+      background: #0b7a3b;
       color: white;
-      padding: 25px 20px;
+      padding: 22px;
       text-align: center;
-      border-radius: 0 0 25px 25px;
     }
 
     header h1 {
-      font-size: 32px;
-      margin-bottom: 8px;
+      margin: 0;
+      font-size: 30px;
     }
 
     header p {
-      font-size: 15px;
-      opacity: 0.9;
+      margin: 8px 0 0;
     }
 
     .container {
-      padding: 25px 20px;
-      max-width: 600px;
+      max-width: 900px;
       margin: auto;
+      padding: 20px;
     }
 
-    .welcome {
-      margin-bottom: 20px;
-    }
-
-    .welcome h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .welcome p {
-      color: #666;
-    }
-
-    .cards {
-      display: grid;
-      gap: 15px;
-    }
-
-    .card {
+    .box {
       background: white;
-      padding: 22px;
-      border-radius: 18px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #0b7a3b;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+
+    button {
+      background: #0b7a3b;
+      color: white;
+      border: none;
+      font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s;
     }
 
-    .card:active {
-      transform: scale(0.97);
+    button:hover {
+      background: #096532;
     }
 
-    .icon {
-      font-size: 35px;
-      margin-bottom: 10px;
+    .annonce {
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 12px;
     }
 
-    .card h3 {
-      margin-bottom: 6px;
-      color: #0b8f45;
+    .prix {
+      color: #0b7a3b;
+      font-size: 20px;
+      font-weight: bold;
     }
 
-    .card p {
+    .ville {
       color: #666;
-      font-size: 14px;
     }
 
-    footer {
-      text-align: center;
-      padding: 30px 20px;
-      color: #888;
-      font-size: 13px;
+    #message {
+      margin-top: 12px;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <h1>🇬🇳 Kalo Guinée</h1>
-    <p>Ton application guinéenne, simple et utile.</p>
-  </header>
+<header>
+  <h1>🇬🇳 Kalo Guinée</h1>
+  <p>Acheter, vendre et trouver des opportunités en Guinée</p>
+</header>
 
-  <main class="container">
+<div class="container">
 
-    <section class="welcome">
-      <h2>Bienvenue 👋</h2>
-      <p>Découvre les services disponibles sur Kalo.</p>
-    </section>
+  <div class="box">
+    <h2>🛍️ Publier une annonce</h2>
 
-    <section class="cards">
+    <input id="nom" type="text" placeholder="Nom du produit">
 
-      <div class="card" onclick="ouvrirVente()">
-  <div class="icon">🛍️</div>
-  <h3>Acheter & vendre</h3>
-  <p>Publie ou découvre des produits à vendre en Guinée.</p>
+    <input id="prix" type="number" placeholder="Prix en GNF">
+
+    <select id="ville">
+      <option value="">Choisir une ville</option>
+      <option>Conakry</option>
+      <option>Kindia</option>
+      <option>Labé</option>
+      <option>Mamou</option>
+      <option>Kankan</option>
+      <option>N'zérékoré</option>
+      <option>Boké</option>
+      <option>Faranah</option>
+    </select>
+
+    <button onclick="publierAnnonce()">Publier l'annonce</button>
+
+    <div id="message"></div>
+  </div>
+
+  <div class="box">
+    <h2>📋 Annonces disponibles</h2>
+    <div id="annonces">
+      Chargement des annonces...
+    </div>
+  </div>
+
 </div>
 
-      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
-        <div class="icon">💼</div>
-        <h3>Emplois & opportunités</h3>
-        <p>Trouve des opportunités professionnelles en Guinée.</p>
-      </div>
+<script type="module">
 
-      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
-        <div class="icon">📱</div>
-        <h3>Services</h3>
-        <p>Accède facilement à différents services utiles.</p>
-      </div>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
-        <div class="icon">💰</div>
-        <h3>Gagner de l'argent</h3>
-        <p>Découvre des moyens de développer tes revenus.</p>
-      </div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
+    authDomain: "kalo-guinee.firebaseapp.com",
+    projectId: "kalo-guinee",
+    storageBucket: "kalo-guinee.firebasestorage.app",
+    messagingSenderId: "21878004061",
+    appId: "1:21878004061:web:402d32ef967f0ceaaef0b4"
+  };
 
-    </section>
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-  </main>
+  window.publierAnnonce = async function() {
 
-  <footer>
-    © 2026 Kalo Guinée — Tous droits réservés.
-  </footer>
- <script>
-function ouvrirVente() {
-  alert("🛍️ Bienvenue sur Kalo !\n\nLa marketplace arrive bientôt.\n\nTu pourras publier tes produits, ajouter un prix et recevoir des clients sur WhatsApp.");
-}
-</script> 
-  alert("🛍️ Bienvenue sur Kalo !\n\nLa marketplace arrive bientôt.\n\nTu pourras publier tes produits, ajouter un prix et recevoir des clients sur WhatsApp.");
-}
+    const nom = document.getElementById("nom").value.trim();
+    const prix = document.getElementById("prix").value;
+    const ville = document.getElementById("ville").value;
+    const message = document.getElementById("message");
+
+    if (!nom || !prix || !ville) {
+      message.style.color = "red";
+      message.textContent = "⚠️ Remplis tous les champs.";
+      return;
+    }
+
+    try {
+
+      await addDoc(collection(db, "annonces"), {
+        nom: nom,
+        prix: Number(prix),
+        ville: ville,
+        date: new Date()
+      });
+
+      message.style.color = "green";
+      message.textContent = "✅ Annonce publiée avec succès !";
+
+      document.getElementById("nom").value = "";
+      document.getElementById("prix").value = "";
+      document.getElementById("ville").value = "";
+
+      afficherAnnonces();
+
+    } catch (error) {
+
+      console.error(error);
+
+      message.style.color = "red";
+      message.textContent = "❌ Impossible de publier l'annonce.";
+
+    }
+
+  };
+
+  async function afficherAnnonces() {
+
+    const zone = document.getElementById("annonces");
+
+    try {
+
+      const q = query(
+        collection(db, "annonces"),
+        orderBy("date", "desc")
+      );
+
+      const resultat = await getDocs(q);
+
+      if (resultat.empty) {
+        zone.innerHTML = "Aucune annonce pour le moment.";
+        return;
+      }
+
+      zone.innerHTML = "";
+
+      resultat.forEach((doc) => {
+
+        const annonce = doc.data();
+
+        const div = document.createElement("div");
+        div.className = "annonce";
+
+        div.innerHTML = `
+          <strong>${annonce.nom}</strong>
+          <div class="prix">${Number(annonce.prix).toLocaleString("fr-FR")} GNF</div>
+          <div class="ville">📍 ${annonce.ville}</div>
+        `;
+
+        zone.appendChild(div);
+
+      });
+
+    } catch (error) {
+
+      console.error(error);
+      zone.innerHTML = "❌ Impossible de charger les annonces.";
+
+    }
+
+  }
+
+  afficherAnnonces();
+
 </script>
+
 </body>
 </html>
