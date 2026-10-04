@@ -1,1 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalo-Guinée</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  background:#f5f7f8;
+  color:#17221b;
+}
+header{
+  background:#0b7a3b;
+  color:white;
+  padding:22px 18px 28px;
+  border-radius:0 0 24px 24px;
+}
+.logo{font-size:28px;font-weight:800}
+.subtitle{margin-top:6px;opacity:.9}
+.search{
+  margin-top:20px;
+  background:white;
+  border-radius:14px;
+  padding:14px;
+  color:#777;
+}
+.container{padding:20px 16px}
+h2{margin-bottom:14px}
+.categories{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  margin-bottom:25px;
+}
+.cat{
+  background:white;
+  padding:13px 16px;
+  border-radius:14px;
+  white-space:nowrap;
+  box-shadow:0 2px 8px #0001;
+}
+.cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.card{
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 3px 12px #0001;
+}
+.photo{
+  height:120px;
+  background:#dcefe4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+}
+.info{padding:12px}
+.price{
+  color:#0b7a3b;
+  font-weight:800;
+  margin:7px 0;
+}
+.location{font-size:13px;color:#777}
+button{
+  border:0;
+  background:#0b7a3b;
+  color:white;
+  padding:14px 18px;
+  border-radius:13px;
+  font-weight:bold;
+}
+.add{
+  width:100%;
+  margin:20px 0;
+  font-size:16px;
+}
+nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:14px 5px;
+  box-shadow:0 -2px 12px #0002;
+}
+nav div{text-align:center;font-size:13px}
+nav span{display:block;font-size:22px;margin-bottom:3px}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🇬🇳 Kalo-Guinée</div>
+  <div class="subtitle">Acheter, vendre et découvrir en Guinée</div>
+
+  <div class="search">
+    🔎 Rechercher un produit ou un service...
+  </div>
+</header>
+
+<div class="container">
+
+  <h2>Catégories</h2>
+
+  <div class="categories">
+    <div class="cat">📱 Téléphones</div>
+    <div class="cat">🚗 Véhicules</div>
+    <div class="cat">🏠 Immobilier</div>
+    <div class="cat">👕 Mode</div>
+    <div class="cat">💼 Services</div>
+  </div>
+
+  <h2>Annonces populaires</h2>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="photo">📱</div>
+      <div class="info">
+        <b>iPhone</b>
+        <div class="price">À partir de 5 000 000 GNF</div>
+        <div class="location">📍 Conakry</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="photo">🚗</div>
+      <div class="info">
+        <b>Voiture</b>
+        <div class="price">Prix à discuter</div>
+        <div class="location">📍 Conakry</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="photo">🏠</div>
+      <div class="info">
+        <b>Maison à louer</b>
+        <div class="price">3 000 000 GNF</div>
+        <div class="location">📍 Lambanyi</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="photo">👕</div>
+      <div class="info">
+        <b>Vêtements</b>
+        <div class="price">À partir de 150 000 GNF</div>
+        <div class="location">📍 Madina</div>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="add" onclick="publier()">
+    ➕ Publier une annonce
+  </button>
+
+</div>
+
+<nav>
+  <div><span>🏠</span>Accueil</div>
+  <div><span>🔎</span>Recherche</div>
+  <div><span>➕</span>Publier</div>
+  <div><span>❤️</span>Favoris</div>
+  <div><span>👤</span>Profil</div>
+</nav>
+
+<script>
+function publier(){
+  alert("La publication d'annonces sera disponible prochainement.
