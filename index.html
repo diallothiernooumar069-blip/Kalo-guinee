@@ -1,130 +1,149 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kalo-Guinée</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalo Guinée</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f6f5;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-header {
-  background: #087f3e;
-  color: white;
-  padding: 25px 15px;
-  text-align: center;
-}
+    body {
+      background: #f5f7f5;
+      color: #222;
+    }
 
-.search {
-  margin-top: 20px;
-}
+    header {
+      background: #0b8f45;
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      border-radius: 0 0 25px 25px;
+    }
 
-input {
-  width: 75%;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-}
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
 
-.container {
-  padding: 20px;
-}
+    header p {
+      font-size: 15px;
+      opacity: 0.9;
+    }
 
-.card {
-  background: white;
-  padding: 18px;
-  margin-bottom: 15px;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px #0002;
-}
+    .container {
+      padding: 25px 20px;
+      max-width: 600px;
+      margin: auto;
+    }
 
-.card h3 {
-  margin-top: 0;
-}
+    .welcome {
+      margin-bottom: 20px;
+    }
 
-.price {
-  color: #087f3e;
-  font-weight: bold;
-}
+    .welcome h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
 
-.hidden {
-  display: none;
-}
-</style>
+    .welcome p {
+      color: #666;
+    }
+
+    .cards {
+      display: grid;
+      gap: 15px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card:active {
+      transform: scale(0.97);
+    }
+
+    .icon {
+      font-size: 35px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      margin-bottom: 6px;
+      color: #0b8f45;
+    }
+
+    .card p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #888;
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🇬🇳 Kalo-Guinée</h1>
-  <p>Acheter et vendre en Guinée</p>
+  <header>
+    <h1>🇬🇳 Kalo Guinée</h1>
+    <p>Ton application guinéenne, simple et utile.</p>
+  </header>
 
-  <div class="search">
-    <input
-      id="search"
-      type="text"
-      placeholder="Rechercher..."
-      oninput="rechercher()"
-    >
-  </div>
-</header>
+  <main class="container">
 
-<div class="container">
+    <section class="welcome">
+      <h2>Bienvenue 👋</h2>
+      <p>Découvre les services disponibles sur Kalo.</p>
+    </section>
 
-  <div class="card annonce">
-    <h3>📱 iPhone</h3>
-    <p class="price">5 000 000 GNF</p>
-    <p>📍 Conakry</p>
-  </div>
+    <section class="cards">
 
-  <div class="card annonce">
-    <h3>🚗 Voiture</h3>
-    <p class="price">Prix à discuter</p>
-    <p>📍 Conakry</p>
-  </div>
+      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
+        <div class="icon">🛍️</div>
+        <h3>Acheter & vendre</h3>
+        <p>Découvre des produits et services près de chez toi.</p>
+      </div>
 
-  <div class="card annonce">
-    <h3>🏠 Maison à louer</h3>
-    <p class="price">3 000 000 GNF</p>
-    <p>📍 Lambanyi</p>
-  </div>
+      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
+        <div class="icon">💼</div>
+        <h3>Emplois & opportunités</h3>
+        <p>Trouve des opportunités professionnelles en Guinée.</p>
+      </div>
 
-  <div class="card annonce">
-    <h3>👕 Vêtements</h3>
-    <p class="price">150 000 GNF</p>
-    <p>📍 Madina</p>
-  </div>
+      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
+        <div class="icon">📱</div>
+        <h3>Services</h3>
+        <p>Accède facilement à différents services utiles.</p>
+      </div>
 
-</div>
+      <div class="card" onclick="alert('Cette fonctionnalité arrive bientôt !')">
+        <div class="icon">💰</div>
+        <h3>Gagner de l'argent</h3>
+        <p>Découvre des moyens de développer tes revenus.</p>
+      </div>
 
-<script>
-function rechercher() {
+    </section>
 
-  let recherche = document
-    .getElementById("search")
-    .value
-    .toLowerCase();
+  </main>
 
-  let annonces = document.querySelectorAll(".annonce");
-
-  annonces.forEach(function(annonce) {
-
-    let texte = annonce.innerText.toLowerCase();
-
-    if (texte.includes(recherche)) {
-      annonce.classList.remove("hidden");
-    } else {
-      annonce.classList.add("hidden");
-    }
-
-  });
-}
-</script>
+  <footer>
+    © 2026 Kalo Guinée — Tous droits réservés.
+  </footer>
 
 </body>
 </html>
