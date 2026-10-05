@@ -1,4 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalo Guinée 🇬🇳</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #0b7a3b;
+      color: white;
+      padding: 22px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
       margin-top: 0;
       color: #0b7a3b;
     }
@@ -11,7 +60,7 @@
       border: 1px solid #ddd;
       font-size: 16px;
     }
-<h2>🔎 Rechercher une annonce</h2>
+
     button {
       background: #0b7a3b;
       color: white;
@@ -35,15 +84,27 @@
       color: #0b7a3b;
       font-size: 20px;
       font-weight: bold;
+      margin-top: 5px;
     }
 
     .ville {
       color: #666;
+      margin-top: 5px;
     }
 
     #message {
       margin-top: 12px;
       font-weight: bold;
+    }
+
+    .recherche {
+      margin-bottom: 20px;
+    }
+
+    .aucune {
+      text-align: center;
+      color: #777;
+      padding: 20px;
     }
   </style>
 </head>
@@ -82,7 +143,31 @@
   </div>
 
   <div class="box">
+    <h2>🔎 Rechercher une annonce</h2>
+
+    <input
+      id="recherche"
+      type="text"
+      placeholder="Exemple : téléphone, voiture, maison..."
+      oninput="filtrerAnnonces()"
+    >
+
+    <select id="filtreVille" onchange="filtrerAnnonces()">
+      <option value="">Toutes les villes</option>
+      <option>Conakry</option>
+      <option>Kindia</option>
+      <option>Labé</option>
+      <option>Mamou</option>
+      <option>Kankan</option>
+      <option>N'zérékoré</option>
+      <option>Boké</option>
+      <option>Faranah</option>
+    </select>
+  </div>
+
+  <div class="box">
     <h2>📋 Annonces disponibles</h2>
+
     <div id="annonces">
       Chargement des annonces...
     </div>
@@ -93,13 +178,12 @@
 <script type="module">
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
   import {
     getFirestore,
     collection,
     addDoc,
-    getDocs,
-    query,
-    orderBy
+    getDocs
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -114,4 +198,167 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  window.publierAnnonce
+  let toutesLesAnnonces = [];
+
+  window.publierAnnonce = async function() {
+
+    const nom = document.getElementById("nom").value.trim();
+    const prix = document.getElementById("prix").value;
+    const ville = document.getElementById("ville").value;
+    const message = document.getElementById("message");
+
+    if (!nom || !prix || !ville) {
+      message.style.color = "red";
+      message.textContent = "⚠️ Remplis tous les champs.";
+      return;
+    }
+
+    try {
+
+      await addDoc(collection(db, "annonces"), {
+        nom: nom,
+        prix: Number(prix),
+        ville: ville,
+        date: new Date()
+      });
+
+      message.style.color = "green";
+      message.textContent = "✅ Annonce publiée avec succès !";
+
+      document.getElementById("nom").value = "";
+      document.getElementById("prix").value = "";
+      document.getElementById("ville").value = "";
+
+      await chargerAnnonces();
+
+    } catch (error) {
+
+      console.error(error);
+
+      message.style.color = "red";
+      message.textContent = "❌ Impossible de publier l'annonce.";
+
+    }
+
+  };
+
+  async function chargerAnnonces() {
+
+    const zone = document.getElementById("annonces");
+
+    try {
+
+      const resultat = await getDocs(
+        collection(db, "annonces")
+      );
+
+      toutesLesAnnonces = [];
+
+      resultat.forEach((doc) => {
+
+        toutesLesAnnonces.push({
+          id: doc.id,
+          ...doc.data()
+        });
+
+      });
+
+      toutesLesAnnonces.sort((a, b) => {
+
+        const dateA = a.date?.toDate
+          ? a.date.toDate()
+          : new Date(0);
+
+        const dateB = b.date?.toDate
+          ? b.date.toDate()
+          : new Date(0);
+
+        return dateB - dateA;
+
+      });
+
+      afficherAnnonces(toutesLesAnnonces);
+
+    } catch (error) {
+
+      console.error(error);
+
+      zone.innerHTML =
+        "❌ Impossible de charger les annonces.";
+
+    }
+
+  }
+
+  window.filtrerAnnonces = function() {
+
+    const recherche =
+      document.getElementById("recherche").value
+      .toLowerCase()
+      .trim();
+
+    const ville =
+      document.getElementById("filtreVille").value;
+
+    const resultats = toutesLesAnnonces.filter((annonce) => {
+
+      const nom =
+        String(annonce.nom || "").toLowerCase();
+
+      const correspondRecherche =
+        nom.includes(recherche);
+
+      const correspondVille =
+        !ville || annonce.ville === ville;
+
+      return correspondRecherche && correspondVille;
+
+    });
+
+    afficherAnnonces(resultats);
+
+  };
+
+  function afficherAnnonces(annonces) {
+
+    const zone = document.getElementById("annonces");
+
+    if (annonces.length === 0) {
+
+      zone.innerHTML =
+        '<div class="aucune">Aucune annonce trouvée.</div>';
+
+      return;
+
+    }
+
+    zone.innerHTML = "";
+
+    annonces.forEach((annonce) => {
+
+      const div = document.createElement("div");
+
+      div.className = "annonce";
+
+      div.innerHTML = `
+        <strong>${annonce.nom}</strong>
+        <div class="prix">
+          ${Number(annonce.prix).toLocaleString("fr-FR")} GNF
+        </div>
+        <div class="ville">
+          📍 ${annonce.ville}
+        </div>
+      `;
+
+      zone.appendChild(div);
+
+    });
+
+  }
+
+  chargerAnnonces();
+
+</script>
+
+</body>
+</html>
