@@ -124,7 +124,12 @@
     <input id="nom" type="text" placeholder="Nom du produit">
 
     <input id="prix" type="number" placeholder="Prix en GNF">
+<input id="photo" type="file" accept="image/*">
+    input id="prix" type="number" placeholder="Prix en GNF">
 
+<input id="photo" type="file" accept="image/*">
+
+<select id="ville">
     <select id="ville">
       <option value="">Choisir une ville</option>
       <option>Conakry</option>
@@ -205,6 +210,11 @@
     const nom = document.getElementById("nom").value.trim();
     const prix = document.getElementById("prix").value;
     const ville = document.getElementById("ville").value;
+    const photo = document.getElementById("photo").
+      const nom = document.getElementById("nom").value.trim();
+const prix = document.getElementById("prix").value;
+const ville = document.getElementById("ville").value;
+const photo = document.getElementById("photo").files[0];
     const message = document.getElementById("message");
 
     if (!nom || !prix || !ville) {
@@ -212,15 +222,44 @@
       message.textContent = "⚠️ Remplis tous les champs.";
       return;
     }
+try {
 
-    try {
+  let imageUrl = "";
 
-      await addDoc(collection(db, "annonces"), {
-        nom: nom,
-        prix: Number(prix),
-        ville: ville,
-        date: new Date()
-      });
+  if (photo) {
+
+    const formData = new FormData();
+
+    formData.append("file", photo);
+    formData.append("upload_preset", "kalo_photos");
+
+    const cloudinaryResponse = await fetch(
+      "https://api.cloudinary.com/v1_1/kkacibse/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const imageData = await cloudinaryResponse.json();
+
+    if (!cloudinaryResponse.ok) {
+      throw new Error(
+        imageData.error?.message || "Erreur lors de l'envoi de la photo."
+      );
+    }
+
+    imageUrl = imageData.secure_url;
+  }
+
+  await addDoc(collection(db, "annonces"), {
+    nom: nom,
+    prix: Number(prix),
+    ville: ville,
+    imageUrl: imageUrl,
+    date: new Date()
+  });
+    
 
       message.style.color = "green";
       message.textContent = "✅ Annonce publiée avec succès !";
@@ -228,7 +267,7 @@
       document.getElementById("nom").value = "";
       document.getElementById("prix").value = "";
       document.getElementById("ville").value = "";
-
+      document.getElementById("photo").value = "";
       await chargerAnnonces();
 
     } catch (error) {
@@ -342,14 +381,24 @@ message.textContent = "❌ Erreur : " + error.message;
       div.className = "annonce";
 
       div.innerHTML = `
-        <strong>${annonce.nom}</strong>
-        <div class="prix">
-          ${Number(annonce.prix).toLocaleString("fr-FR")} GNF
-        </div>
-        <div class="ville">
-          📍 ${annonce.ville}
-        </div>
-      `;
+  ${annonce.imageUrl ? `
+    <img
+      src="${annonce.imageUrl}"
+      alt="${annonce.nom}"
+      style="width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin-bottom:10px;"
+    >
+  ` : ""}
+
+  <strong>${annonce.nom}</strong>
+
+  <div class="prix">
+    ${Number(annonce.prix).toLocaleString("fr-FR")} GNF
+  </div>
+
+  <div class="ville">
+    📍 ${annonce.ville}
+  </div>
+`;
 
       zone.appendChild(div);
 
