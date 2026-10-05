@@ -236,7 +236,8 @@
       console.error(error);
 
       message.style.color = "red";
-      message.textContent = "❌ Impossible de publier l'annonce.";
+message.textContent = "❌ Erreur : " + error.message;
+      
 
     }
 
