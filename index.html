@@ -210,50 +210,5 @@
     const zone = document.getElementById("annonces");
 
     try {
-
-      const q = query(
-        collection(db, "annonces"),
-        orderBy("date", "desc")
-      );
-
-      const resultat = await getDocs(q);
-
-      if (resultat.empty) {
-        zone.innerHTML = "Aucune annonce pour le moment.";
-        return;
-      }
-
-      zone.innerHTML = "";
-
-      resultat.forEach((doc) => {
-
-        const annonce = doc.data();
-
-        const div = document.createElement("div");
-        div.className = "annonce";
-
-        div.innerHTML = `
-          <strong>${annonce.nom}</strong>
-          <div class="prix">${Number(annonce.prix).toLocaleString("fr-FR")} GNF</div>
-          <div class="ville">📍 ${annonce.ville}</div>
+="ville">📍 ${annonce.ville}</div>
         `;
-
-        zone.appendChild(div);
-
-      });
-
-    } catch (error) {
-
-      console.error(error);
-      zone.innerHTML = "❌ Impossible de charger les annonces.";
-
-    }
-
-  }
-
-  afficherAnnonces();
-
-</script>
-
-</body>
-</html>
