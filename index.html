@@ -206,11 +206,12 @@
 
     const nom = document.getElementById("nom").value.trim();
 const prix = document.getElementById("prix").value;
+    const telephone = document.getElementById("telephone").value.trim();
 const ville = document.getElementById("ville").value;
 const photo = document.getElementById("photo").files[0];
 const message = document.getElementById("message");
 
-    if (!nom || !prix || !ville) {
+    if (!nom || !prix || !telephone || !ville) {
       message.style.color = "red";
       message.textContent = "⚠️ Remplis tous les champs.";
       return;
@@ -249,6 +250,7 @@ try {
     nom: nom,
     prix: Number(prix),
     ville: ville,
+    telephone: telephone,
     imageUrl: imageUrl,
     date: new Date()
   });
@@ -259,6 +261,7 @@ try {
 
       document.getElementById("nom").value = "";
       document.getElementById("prix").value = "";
+      document.getElementById("telephone").value = "";
       document.getElementById("ville").value = "";
       document.getElementById("photo").value = "";
       await chargerAnnonces();
