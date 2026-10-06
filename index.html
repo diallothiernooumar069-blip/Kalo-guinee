@@ -208,14 +208,10 @@
   window.publierAnnonce = async function() {
 
     const nom = document.getElementById("nom").value.trim();
-    const prix = document.getElementById("prix").value;
-    const ville = document.getElementById("ville").value;
-    const photo = document.getElementById("photo").
-      const nom = document.getElementById("nom").value.trim();
 const prix = document.getElementById("prix").value;
 const ville = document.getElementById("ville").value;
 const photo = document.getElementById("photo").files[0];
-    const message = document.getElementById("message");
+const message = document.getElementById("message");
 
     if (!nom || !prix || !ville) {
       message.style.color = "red";
