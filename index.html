@@ -203,13 +203,16 @@
     addDoc,
     getDocs
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-  import {
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
+import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-   
+
   const firebaseConfig = {
     apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
     authDomain: "kalo-guinee.firebaseapp.com",
