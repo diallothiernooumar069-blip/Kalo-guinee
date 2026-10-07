@@ -293,6 +293,14 @@ window.seDeconnecter = async function() {
 };
 
   window.publierAnnonce = async function() {
+  const utilisateur = auth.currentUser;
+
+if (!utilisateur) {
+  const message = document.getElementById("message");
+  message.style.color = "red";
+  message.textContent = "🔐 Connecte-toi en tant que vendeur avant de publier.";
+  return;
+}
 
     const nom = document.getElementById("nom").value.trim();
 const prix = document.getElementById("prix").value;
