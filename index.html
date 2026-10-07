@@ -394,6 +394,28 @@ message.textContent = "❌ Erreur : " + error.message;
   <div class="ville">
     📍 ${annonce.ville}
   </div>
+  ${annonce.telephone ? `
+  <div style="margin-top:15px;">
+    📞 ${annonce.telephone}
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <a
+      href="tel:${annonce.telephone}"
+      style="flex:1; background:#0a8f3d; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
+    >
+      📞 Appeler
+    </a>
+
+    <a
+      href="https://wa.me/${annonce.telephone.replace(/\D/g, '')}"
+      target="_blank"
+      style="flex:1; background:#25D366; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
+    >
+      💬 WhatsApp
+    </a>
+  </div>
+` : ""}
 `;
 
       zone.appendChild(div);
