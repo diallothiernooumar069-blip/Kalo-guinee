@@ -226,7 +226,14 @@ import {
   const db = getFirestore(app);
   const auth = getAuth(app);
   onAuthStateChanged(auth, (utilisateur) => {
+  console.log("État vendeur :", utilisateur);
+
   const message = document.getElementById("authMessage");
+
+  if (!message) {
+    console.log("❌ authMessage introuvable");
+    return;
+  }
 
   if (utilisateur) {
     message.style.color = "green";
