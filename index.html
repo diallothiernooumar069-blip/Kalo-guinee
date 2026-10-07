@@ -222,6 +222,17 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  onAuthStateChanged(auth, (utilisateur) => {
+  const message = document.getElementById("authMessage");
+
+  if (utilisateur) {
+    message.style.color = "green";
+    message.textContent = "🟢 Vendeur connecté : " + utilisateur.email;
+  } else {
+    message.style.color = "red";
+    message.textContent = "🔴 Aucun vendeur connecté.";
+  }
+});
   let toutesLesAnnonces = [];
   window.creerCompte = async function() {
   const email = document.getElementById("email").value.trim();
