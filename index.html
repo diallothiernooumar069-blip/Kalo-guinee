@@ -16,7 +16,7 @@
       background: #f5f6f8;
       color: #222;
     }
-
+    
     header {
       background: #0b7a3b;
       color: white;
@@ -110,7 +110,23 @@
 </head>
 
 <body>
+  
+<div class="box">
+  <h2>🔐 Connexion vendeur</h2>
 
+  <input id="email" type="email" placeholder="Adresse e-mail">
+
+  <input id="motDePasse" type="password" placeholder="Mot de passe">
+
+  <button onclick="creerCompte()">Créer mon compte</button>
+
+  <button onclick="seConnecter()">Se connecter</button>
+
+  <button onclick="seDeconnecter()">Se déconnecter</button>
+
+  <div id="authMessage"></div>
+</div>
+  
 <header>
   <h1>🇬🇳 Kalo Guinée</h1>
   <p>Acheter, vendre et trouver des opportunités en Guinée</p>
@@ -187,6 +203,12 @@
     addDoc,
     getDocs
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
    import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -207,6 +229,74 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   let toutesLesAnnonces = [];
+  window.creerCompte = async function() {
+  const email = document.getElementById("email").value.trim();
+  const motDePasse = document.getElementById("motDePasse").value;
+  const message = document.getElementById("authMessage");
+
+  if (!email || !motDePasse) {
+    message.style.color = "red";
+    message.textContent = "⚠️ Remplis l'e-mail et le mot de passe.";
+    return;
+  }
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, motDePasse);
+
+    message.style.color = "green";
+    message.textContent = "✅ Compte vendeur créé avec succès !";
+
+  } catch (error) {
+    console.error(error);
+
+    message.style.color = "red";
+    message.textContent = "❌ " + error.message;
+  }
+};
+
+
+window.seConnecter = async function() {
+  const email = document.getElementById("email").value.trim();
+  const motDePasse = document.getElementById("motDePasse").value;
+  const message = document.getElementById("authMessage");
+
+  if (!email || !motDePasse) {
+    message.style.color = "red";
+    message.textContent = "⚠️ Remplis l'e-mail et le mot de passe.";
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, motDePasse);
+
+    message.style.color = "green";
+    message.textContent = "✅ Connexion réussie !";
+
+  } catch (error) {
+    console.error(error);
+
+    message.style.color = "red";
+    message.textContent = "❌ E-mail ou mot de passe incorrect.";
+  }
+};
+
+
+window.seDeconnecter = async function() {
+  const message = document.getElementById("authMessage");
+
+  try {
+    await signOut(auth);
+
+    message.style.color = "green";
+    message.textContent = "✅ Vous êtes déconnecté.";
+
+  } catch (error) {
+    console.error(error);
+
+    message.style.color = "red";
+    message.textContent = "❌ Erreur lors de la déconnexion.";
+  }
+};
 
   window.publierAnnonce = async function() {
 
