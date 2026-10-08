@@ -476,9 +476,9 @@ message.textContent = "❌ Erreur : " + error.message;
 
     annonces.forEach((annonce) => {
 
-      const div = document.createElement("div");
-
-      div.className = "annonce";
+    const div = document.createElement("div");
+   const telephone = String(annonce.telephone || "");
+    div.className = "annonce";
 
       div.innerHTML = `
   ${annonce.imageUrl ? `
@@ -498,21 +498,21 @@ message.textContent = "❌ Erreur : " + error.message;
   <div class="ville">
     📍 ${annonce.ville}
   </div>
-  ${annonce.telephone ? `
+  ${telephone ? `
   <div style="margin-top:15px;">
-    📞 ${annonce.telephone}
+   📞 ${telephone} 
   </div>
 
   <div style="display:flex; gap:10px; margin-top:10px;">
     <a
-      href="tel:${annonce.telephone}"
+      href="tel:${telephone}"
       style="flex:1; background:#0a8f3d; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
     >
       📞 Appeler
     </a>
 
     <a
-      href="https://wa.me/${annonce.telephone.replace(/\D/g, '')}"
+     href="https://wa.me/${telephone.replace(/\D/g, '')}" 
       target="_blank"
       style="flex:1; background:#25D366; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
     >
