@@ -195,21 +195,21 @@
 
 <script type="module">
 
-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
@@ -225,6 +225,7 @@ import {
   const auth = getAuth(app);
   
   let toutesLesAnnonces = [];
+
   window.creerCompte = async function() {
   const email = document.getElementById("email").value.trim();
   const motDePasse = document.getElementById("motDePasse").value;
