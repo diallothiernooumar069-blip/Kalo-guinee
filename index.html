@@ -195,14 +195,7 @@
 
 <script type="module">
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
-   import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
 import {
@@ -252,7 +245,6 @@ import {
   }
 };
 window.seConnecter = async function() {
-  alert("Le bouton fonctionne !");
   const email = document.getElementById("email").value.trim();
   const motDePasse = document.getElementById("motDePasse").value;
   const message = document.getElementById("authMessage");
