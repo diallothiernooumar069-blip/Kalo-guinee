@@ -392,6 +392,7 @@ message.textContent = "❌ Erreur : " + error.message;
       );
 
       toutesLesAnnonces = [];
+      console.log("Annonces récupérées :", resultat.size);
 
       resultat.forEach((doc) => {
 
@@ -404,17 +405,17 @@ message.textContent = "❌ Erreur : " + error.message;
 
       toutesLesAnnonces.sort((a, b) => {
 
-        const dateA = a.date?.toDate
-          ? a.date.toDate()
-          : new Date(0);
+  const dateA = a.date?.toDate
+    ? a.date.toDate().getTime()
+    : 0;
 
-        const dateB = b.date?.toDate
-          ? b.date.toDate()
-          : new Date(0);
+  const dateB = b.date?.toDate
+    ? b.date.toDate().getTime()
+    : 0;
 
-        return dateB - dateA;
+  return dateB - dateA;
 
-      });
+});
 
       afficherAnnonces(toutesLesAnnonces);
 
