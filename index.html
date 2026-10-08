@@ -420,8 +420,7 @@ message.textContent = "❌ Erreur : " + error.message;
 
   });
 }
-
-      toutesLesAnnonces.sort((a, b) => {
+toutesLesAnnonces.sort((a, b) => {
 
   const dateA = a.date?.toDate
     ? a.date.toDate().getTime()
@@ -534,6 +533,7 @@ message.textContent = "❌ Erreur : " + error.message;
   chargerAnnonces();
 
 </script>
+      
 
 </body>
 </html>
