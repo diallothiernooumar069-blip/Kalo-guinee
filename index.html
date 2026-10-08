@@ -265,6 +265,8 @@ window.seConnecter = async function() {
   try {
     await signInWithEmailAndPassword(auth, email, motDePasse);
 
+alert("✅ Connexion réussie !");
+
     message.style.color = "green";
     message.textContent = "✅ Connexion réussie !";
 
