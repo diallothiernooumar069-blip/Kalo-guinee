@@ -381,27 +381,45 @@ message.textContent = "❌ Erreur : " + error.message;
 
   };
 
-  async function chargerAnnonces() {
+  function afficherAnnonces(annonces) {
 
-    const zone = document.getElementById("annonces");
+  const zone = document.getElementById("annonces");
 
-    try {
+  zone.innerHTML = "";
 
-      const resultat = await getDocs(
-        collection(db, "annonces")
-      );
+  if (annonces.length === 0) {
+    zone.innerHTML = "Aucune annonce trouvée.";
+    return;
+  }
 
-      toutesLesAnnonces = [];
-      console.log("Annonces récupérées :", resultat.size);
+  annonces.forEach((annonce) => {
 
-      resultat.forEach((doc) => {
+    const div = document.createElement("div");
 
-        toutesLesAnnonces.push({
-          id: doc.id,
-          ...doc.data()
-        });
+    div.className = "annonce";
 
-      });
+    div.innerHTML = `
+      <h3>${annonce.nom || "Sans nom"}</h3>
+
+      <p>💰 ${annonce.prix || 0} GNF</p>
+
+      <p>📍 ${annonce.ville || "Ville inconnue"}</p>
+
+      ${annonce.imageUrl
+        ? `<img src="${annonce.imageUrl}" style="max-width:100%; border-radius:10px;">`
+        : ""
+      }
+
+      ${annonce.telephone
+        ? `<p>📞 ${annonce.telephone}</p>`
+        : ""
+      }
+    `;
+
+    zone.appendChild(div);
+
+  });
+}
 
       toutesLesAnnonces.sort((a, b) => {
 
@@ -414,21 +432,6 @@ message.textContent = "❌ Erreur : " + error.message;
     : 0;
 
   return dateB - dateA;
-
-});
-
-      afficherAnnonces(toutesLesAnnonces);
-
-    } catch (error) {
-
-      console.error(error);
-
-      zone.innerHTML =
-        "❌ Impossible de charger les annonces.";
-
-    }
-
-  }
 
   window.filtrerAnnonces = function() {
 
