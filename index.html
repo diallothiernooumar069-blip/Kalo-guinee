@@ -251,9 +251,30 @@ import {
     message.textContent = "❌ " + error.message;
   }
 };
+window.seConnecter = async function() {
+  const email = document.getElementById("email").value.trim();
+  const motDePasse = document.getElementById("motDePasse").value;
+  const message = document.getElementById("authMessage");
 
+  if (!email || !motDePasse) {
+    message.style.color = "red";
+    message.textContent = "⚠️ Remplis l'e-mail et le mot de passe.";
+    return;
+  }
 
-message.textContent = "✅ Connexion réussie !";
+  try {
+    await signInWithEmailAndPassword(auth, email, motDePasse);
+
+    message.style.color = "green";
+    message.textContent = "✅ Connexion réussie !";
+
+  } catch (error) {
+    console.error(error);
+
+    message.style.color = "red";
+    message.textContent = "❌ E-mail ou mot de passe incorrect.";
+  }
+};
 
 
 window.seDeconnecter = async function() {
