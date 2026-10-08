@@ -348,13 +348,15 @@ try {
   }
 
   await addDoc(collection(db, "annonces"), {
-    nom: nom,
-    prix: Number(prix),
-    ville: ville,
-    telephone: telephone,
-    imageUrl: imageUrl,
-    date: new Date()
-  });
+  nom: nom,
+  prix: Number(prix),
+  ville: ville,
+  telephone: telephone,
+  imageUrl: imageUrl,
+  vendeurEmail: utilisateur.email,
+  vendeurId: utilisateur.uid,
+  date: new Date()
+});
     
 
       message.style.color = "green";
