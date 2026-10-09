@@ -562,7 +562,32 @@ div.appendChild(badge);
         boutons.appendChild(whatsapp);
         div.appendChild(boutons);
       }
+   // ⭐ Bouton de promotion réservé au propriétaire
+if (
+auth.currentUser &&
+annonce.vendeurId === auth.currentUser.uid
+) {
+const boutonSponsoriser = document.createElement(“button”);
+    boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
 
+    boutonSponsoriser.style.width = "100%";
+    boutonSponsoriser.style.marginTop = "10px";
+    boutonSponsoriser.style.background = "#f0b429";
+    boutonSponsoriser.style.color = "#222";
+    boutonSponsoriser.style.fontWeight = "bold";
+
+    boutonSponsoriser.onclick = () => {
+      alert(
+        "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
+        "7 jours : 10 000 GNF\n" +
+        "15 jours : 20 000 GNF\n" +
+        "30 jours : 50 000 GNF\n\n" +
+        "Le paiement sera bientôt disponible."
+      );
+    };
+
+    div.appendChild(boutonSponsoriser);
+  }
       zone.appendChild(div);
     });
   }
