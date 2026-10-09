@@ -547,7 +547,117 @@ message.textContent = "❌ Erreur : " + error.message;
       zone.appendChild(div);
     });
   }
+   // MODIFIER UNE ANNONCE
+  window.modifierAnnonce = async function(annonce) {
+    const utilisateur = auth.currentUser;
 
+    if (!utilisateur || utilisateur.uid !== annonce.vendeurId) {
+      alert("⛔ Tu ne peux modifier que tes propres annonces.");
+      return;
+    }
+
+    const nouveauNom = prompt(
+      "Nom du produit :",
+      annonce.nom || ""
+    );
+
+    if (nouveauNom === null) return;
+
+    const nouveauPrix = prompt(
+      "Prix en GNF :",
+      annonce.prix || ""
+    );
+
+    if (nouveauPrix === null) return;
+
+    const nouveauTelephone = prompt(
+      "Numéro de téléphone :",
+      annonce.telephone || ""
+    );
+
+    if (nouveauTelephone === null) return;
+
+    const nouvelleVille = prompt(
+      "Ville :",
+      annonce.ville || ""
+    );
+
+    if (nouvelleVille === null) return;
+
+    if (
+      !nouveauNom.trim() ||
+      !nouveauPrix.trim() ||
+      !nouveauTelephone.trim() ||
+      !nouvelleVille.trim() ||
+      !Number.isFinite(Number(nouveauPrix)) ||
+      Number(nouveauPrix) <= 0
+    ) {
+      alert("⚠️ Vérifie les informations et le prix.");
+      return;
+    }
+
+    const villesAutorisees = [
+      "Conakry",
+      "Kindia",
+      "Labé",
+      "Mamou",
+      "Kankan",
+      "N'zérékoré",
+      "Boké",
+      "Faranah"
+    ];
+
+    if (!villesAutorisees.includes(nouvelleVille.trim())) {
+      alert("⚠️ Choisis une ville proposée sur Kalo Guinée.");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "annonces", annonce.id), {
+        nom: nouveauNom.trim(),
+        prix: Number(nouveauPrix),
+        telephone: nouveauTelephone.trim(),
+        ville: nouvelleVille.trim()
+      });
+
+      alert("✅ Annonce modifiée avec succès !");
+      await chargerAnnonces();
+
+    } catch (error) {
+      console.error("Erreur de modification :", error);
+      alert("❌ Impossible de modifier l'annonce. Vérifie les règles Firestore.");
+    }
+  };
+
+
+  // SUPPRIMER UNE ANNONCE
+  window.supprimerAnnonce = async function(annonce) {
+    const utilisateur = auth.currentUser;
+
+    if (!utilisateur || utilisateur.uid !== annonce.vendeurId) {
+      alert("⛔ Tu ne peux supprimer que tes propres annonces.");
+      return;
+    }
+
+    const confirmation = confirm(
+      'Veux-tu vraiment supprimer l’annonce "' +
+      annonce.nom +
+      '" ? Cette action est irréversible.'
+    );
+
+    if (!confirmation) return;
+
+    try {
+      await deleteDoc(doc(db, "annonces", annonce.id));
+
+      alert("✅ Annonce supprimée avec succès !");
+      await chargerAnnonces();
+
+    } catch (error) {
+      console.error("Erreur de suppression :", error);
+      alert("❌ Impossible de supprimer l'annonce. Vérifie les règles Firestore.");
+    }
+  };
   // Charger les annonces au démarrage.
   chargerAnnonces();
 
