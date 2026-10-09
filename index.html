@@ -486,6 +486,33 @@ message.textContent = "❌ Erreur : " + error.message;
       villeDiv.className = "ville";
       villeDiv.textContent = "📍 " + ville;
       div.appendChild(villeDiv);
+            // Boutons visibles uniquement pour le propriétaire connecté.
+      if (
+        auth.currentUser &&
+        annonce.vendeurId === auth.currentUser.uid
+      ) {
+        const actions = document.createElement("div");
+        actions.style.display = "flex";
+        actions.style.gap = "10px";
+        actions.style.marginTop = "12px";
+
+        const boutonModifier = document.createElement("button");
+        boutonModifier.textContent = "✏️ Modifier";
+        boutonModifier.style.flex = "1";
+
+        boutonModifier.onclick = () => modifierAnnonce(annonce);
+
+        const boutonSupprimer = document.createElement("button");
+        boutonSupprimer.textContent = "🗑️ Supprimer";
+        boutonSupprimer.style.flex = "1";
+        boutonSupprimer.style.background = "#c62828";
+
+        boutonSupprimer.onclick = () => supprimerAnnonce(annonce);
+
+        actions.appendChild(boutonModifier);
+        actions.appendChild(boutonSupprimer);
+        div.appendChild(actions);
+      }
 
       if (telephone) {
         const numero = document.createElement("p");
