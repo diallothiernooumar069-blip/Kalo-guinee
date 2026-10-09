@@ -467,7 +467,19 @@ message.textContent = "❌ Erreur : " + error.message;
       const telephone = String(annonce.telephone || "");
       const ville = String(annonce.ville || "Ville inconnue");
       const prix = Number(annonce.prix || 0).toLocaleString("fr-FR");
-
+      // ⭐ Badge pour les annonces sponsorisées
+if (annonce.sponsorise === true) {
+const badge = document.createElement(“div”);
+badge.textContent = “⭐ ANNONCE SPONSORISÉE”;
+badge.style.background = “#fff3cd”;
+badge.style.color = “#856404”;
+badge.style.padding = “8px”;
+badge.style.borderRadius = “8px”;
+badge.style.fontWeight = “bold”;
+badge.style.textAlign = “center”;
+badge.style.marginBottom = “10px”;
+div.appendChild(badge);
+}
       const titre = document.createElement("h3");
       titre.textContent = nom;
       div.appendChild(titre);
