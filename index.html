@@ -466,20 +466,7 @@ message.textContent = "❌ Erreur : " + error.message;
       const nom = String(annonce.nom || "Sans nom");
       const telephone = String(annonce.telephone || "");
       const ville = String(annonce.ville || "Ville inconnue");
-      const prix = Number(annonce.prix || 0).toLocaleString("fr-FR");
-      // ⭐ Badge pour les annonces sponsorisées
-if (annonce.sponsorise === true) {
-const badge = document.createElement(“div”);
-badge.textContent = “⭐ ANNONCE SPONSORISÉE”;
-badge.style.background = “#fff3cd”;
-badge.style.color = “#856404”;
-badge.style.padding = “8px”;
-badge.style.borderRadius = “8px”;
-badge.style.fontWeight = “bold”;
-badge.style.textAlign = “center”;
-badge.style.marginBottom = “10px”;
-div.appendChild(badge);
-}
+      const prix = Number(annonce.prix || 0).toLocaleString("fr-
       const titre = document.createElement("h3");
       titre.textContent = nom;
       div.appendChild(titre);
@@ -495,7 +482,20 @@ div.appendChild(badge);
         image.style.marginBottom = "10px";
         div.appendChild(image);
       }
-
+        FR");
+      // ⭐ Badge pour les annonces sponsorisées
+if (annonce.sponsorise === true) {
+const badge = document.createElement(“div”);
+badge.textContent = “⭐ ANNONCE SPONSORISÉE”;
+badge.style.background = “#fff3cd”;
+badge.style.color = “#856404”;
+badge.style.padding = “8px”;
+badge.style.borderRadius = “8px”;
+badge.style.fontWeight = “bold”;
+badge.style.textAlign = “center”;
+badge.style.marginBottom = “10px”;
+div.appendChild(badge);
+}
       const prixDiv = document.createElement("div");
       prixDiv.className = "prix";
       prixDiv.textContent = prix + " GNF";
@@ -562,12 +562,25 @@ div.appendChild(badge);
         boutons.appendChild(whatsapp);
         div.appendChild(boutons);
       }
-   // ⭐ Bouton de promotion réservé au propriétaire
-if (
-auth.currentUser &&
-annonce.vendeurId === auth.currentUser.uid
-) {
-const boutonSponsoriser = document.createElement(“button”);
+     boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
+    boutonSponsoriser.style.width = "100%";
+    boutonSponsoriser.style.marginTop = "10px";
+    boutonSponsoriser.style.background = "#f0b429";
+    boutonSponsoriser.style.color = "#222";
+    boutonSponsoriser.style.fontWeight = "bold";
+
+    boutonSponsoriser.onclick = () => {
+      alert(
+        "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
+        "7 jours : 10 000 GNF\n" +
+        "15 jours : 20 000 GNF\n" +
+        "30 jours : 50 000 GNF\n\n" +
+        "Le paiement sera bientôt disponible."
+      );
+    };
+
+    div.appendChild(boutonSponsoriser);
+  }
     boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
 
     boutonSponsoriser.style.width = "100%";
