@@ -381,155 +381,144 @@ message.textContent = "❌ Erreur : " + error.message;
 
   };
 
-  function afficherAnnonces(annonces) {
+  async function chargerAnnonces() {
+    const zone = document.getElementById("annonces");
 
-  const zone = document.getElementById("annonces");
+    try {
+      zone.innerHTML = "Chargement des annonces...";
 
-  zone.innerHTML = "";
+      const resultat = await getDocs(collection(db, "annonces"));
 
-  if (annonces.length === 0) {
-    zone.innerHTML = "Aucune annonce trouvée.";
-    return;
+      toutesLesAnnonces = [];
+
+      resultat.forEach((documentAnnonce) => {
+        toutesLesAnnonces.push({
+          id: documentAnnonce.id,
+          ...documentAnnonce.data()
+        });
+      });
+
+      // Afficher les annonces les plus récentes en premier.
+      toutesLesAnnonces.sort((a, b) => {
+        const dateA = a.date?.toDate
+          ? a.date.toDate().getTime()
+          : 0;
+
+        const dateB = b.date?.toDate
+          ? b.date.toDate().getTime()
+          : 0;
+
+        return dateB - dateA;
+      });
+
+      filtrerAnnonces();
+
+    } catch (error) {
+      console.error("Erreur de chargement :", error);
+      zone.textContent = "❌ Impossible de charger les annonces.";
+    }
   }
 
-  annonces.forEach((annonce) => {
-
-    const div = document.createElement("div");
-
-    div.className = "annonce";
-
-    div.innerHTML = `
-      <h3>${annonce.nom || "Sans nom"}</h3>
-
-      <p>💰 ${annonce.prix || 0} GNF</p>
-
-      <p>📍 ${annonce.ville || "Ville inconnue"}</p>
-
-      ${annonce.imageUrl
-        ? `<img src="${annonce.imageUrl}" style="max-width:100%; border-radius:10px;">`
-        : ""
-      }
-
-      ${annonce.telephone
-        ? `<p>📞 ${annonce.telephone}</p>`
-        : ""
-      }
-    `;
-
-    zone.appendChild(div);
-
-  });
-}
-toutesLesAnnonces.sort((a, b) => {
-
-  const dateA = a.date?.toDate
-    ? a.date.toDate().getTime()
-    : 0;
-
-  const dateB = b.date?.toDate
-    ? b.date.toDate().getTime()
-    : 0;
-
-  return dateB - dateA;
-
   window.filtrerAnnonces = function() {
-
-    const recherche =
-      document.getElementById("recherche").value
-      .toLowerCase()
+    const recherche = document
+      .getElementById("recherche")
+      .value.toLowerCase()
       .trim();
 
-    const ville =
-      document.getElementById("filtreVille").value;
+    const ville = document.getElementById("filtreVille").value;
 
     const resultats = toutesLesAnnonces.filter((annonce) => {
+      const nom = String(annonce.nom || "").toLowerCase();
 
-      const nom =
-        String(annonce.nom || "").toLowerCase();
-
-      const correspondRecherche =
-        nom.includes(recherche);
-
-      const correspondVille =
-        !ville || annonce.ville === ville;
+      const correspondRecherche = nom.includes(recherche);
+      const correspondVille = !ville || annonce.ville === ville;
 
       return correspondRecherche && correspondVille;
-
     });
 
     afficherAnnonces(resultats);
-
   };
 
   function afficherAnnonces(annonces) {
-
     const zone = document.getElementById("annonces");
-
-    if (annonces.length === 0) {
-
-      zone.innerHTML =
-        '<div class="aucune">Aucune annonce trouvée.</div>';
-
-      return;
-
-    }
-
     zone.innerHTML = "";
 
+    if (annonces.length === 0) {
+      zone.innerHTML =
+        '<div class="aucune">Aucune annonce trouvée.</div>';
+      return;
+    }
+
     annonces.forEach((annonce) => {
+      const div = document.createElement("div");
+      div.className = "annonce";
 
-    const div = document.createElement("div");
-   const telephone = String(annonce.telephone || "");
-    div.className = "annonce";
+      const nom = String(annonce.nom || "Sans nom");
+      const telephone = String(annonce.telephone || "");
+      const ville = String(annonce.ville || "Ville inconnue");
+      const prix = Number(annonce.prix || 0).toLocaleString("fr-FR");
 
-      div.innerHTML = `
-  ${annonce.imageUrl ? `
-    <img
-      src="${annonce.imageUrl}"
-      alt="${annonce.nom}"
-      style="width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin-bottom:10px;"
-    >
-  ` : ""}
+      const titre = document.createElement("h3");
+      titre.textContent = nom;
+      div.appendChild(titre);
 
-  <strong>${annonce.nom}</strong>
+      if (annonce.imageUrl) {
+        const image = document.createElement("img");
+        image.src = annonce.imageUrl;
+        image.alt = nom;
+        image.style.width = "100%";
+        image.style.maxHeight = "300px";
+        image.style.objectFit = "cover";
+        image.style.borderRadius = "10px";
+        image.style.marginBottom = "10px";
+        div.appendChild(image);
+      }
 
-  <div class="prix">
-    ${Number(annonce.prix).toLocaleString("fr-FR")} GNF
-  </div>
+      const prixDiv = document.createElement("div");
+      prixDiv.className = "prix";
+      prixDiv.textContent = prix + " GNF";
+      div.appendChild(prixDiv);
 
-  <div class="ville">
-    📍 ${annonce.ville}
-  </div>
-  ${telephone ? `
-  <div style="margin-top:15px;">
-   📞 ${telephone} 
-  </div>
+      const villeDiv = document.createElement("div");
+      villeDiv.className = "ville";
+      villeDiv.textContent = "📍 " + ville;
+      div.appendChild(villeDiv);
 
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <a
-      href="tel:${telephone}"
-      style="flex:1; background:#0a8f3d; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
-    >
-      📞 Appeler
-    </a>
+      if (telephone) {
+        const numero = document.createElement("p");
+        numero.textContent = "📞 " + telephone;
+        div.appendChild(numero);
 
-    <a
-     href="https://wa.me/${telephone.replace(/\D/g, '')}" 
-      target="_blank"
-      style="flex:1; background:#25D366; color:white; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-weight:bold;"
-    >
-      💬 WhatsApp
-    </a>
-  </div>
-` : ""}
-`;
+        const boutons = document.createElement("div");
+        boutons.style.display = "flex";
+        boutons.style.gap = "10px";
+        boutons.style.marginTop = "10px";
+
+        const appel = document.createElement("a");
+        appel.href = "tel:" + telephone;
+        appel.textContent = "📞 Appeler";
+        appel.style.cssText =
+          "flex:1;background:#0a8f3d;color:white;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold;";
+
+        const whatsapp = document.createElement("a");
+        whatsapp.href =
+          "https://wa.me/" + telephone.replace(/\D/g, "");
+        whatsapp.target = "_blank";
+        whatsapp.rel = "noopener noreferrer";
+        whatsapp.textContent = "💬 WhatsApp";
+        whatsapp.style.cssText =
+          "flex:1;background:#25D366;color:white;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold;";
+
+        boutons.appendChild(appel);
+        boutons.appendChild(whatsapp);
+        div.appendChild(boutons);
+      }
 
       zone.appendChild(div);
-
     });
-
   }
 
+  // Charger les annonces au démarrage.
   chargerAnnonces();
 
 </script>
