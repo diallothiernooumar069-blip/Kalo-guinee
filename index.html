@@ -466,7 +466,7 @@ message.textContent = "❌ Erreur : " + error.message;
       const nom = String(annonce.nom || "Sans nom");
       const telephone = String(annonce.telephone || "");
       const ville = String(annonce.ville || "Ville inconnue");
-      const prix = Number(annonce.prix || 0).toLocaleString("fr-
+      const prix = Number(annonce.prix || 0).toLocaleString("fr-FR") + " GNF"; 
       const titre = document.createElement("h3");
       titre.textContent = nom;
       div.appendChild(titre);
