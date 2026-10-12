@@ -723,7 +723,40 @@ message.textContent = "❌ Erreur : " + error.message;
   };
   // Charger les annonces au démarrage.
   chargerAnnonces();
+window.choisirDureeSponsorisation = function(idAnnonce) {
+  const choix = prompt(
+    "⭐ CHOISIS LA DURÉE DU SPONSORING\n\n" +
+    "1 - 7 jours : 10 000 GNF\n" +
+    "2 - 15 jours : 20 000 GNF\n" +
+    "3 - 30 jours : 50 000 GNF\n\n" +
+    "Entre 1, 2 ou 3 :"
+  );
 
+  const tarifs = {
+    "1": { jours: 7, prix: 10000 },
+    "2": { jours: 15, prix: 20000 },
+    "3": { jours: 30, prix: 50000 }
+  };
+
+  if (choix === null) {
+    return;
+  }
+
+  const formule = tarifs[choix.trim()];
+
+  if (!formule) {
+    alert("❌ Choix invalide. Entre 1, 2 ou 3.");
+    return;
+  }
+
+  alert(
+    "✅ Formule sélectionnée !\n\n" +
+    "Durée : " + formule.jours + " jours\n" +
+    "Montant : " + formule.prix.toLocaleString("fr-FR") +
+    " GNF\n\n" +
+    "La prochaine étape sera de préparer le paiement Orange Money."
+  );
+};
 </script>
       
 
