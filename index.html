@@ -443,167 +443,173 @@ message.textContent = "❌ Erreur : " + error.message;
   };
 
   function afficherAnnonces(annonces) {
-    const zone = document.getElementById("annonces");
-    zone.innerHTML = "";
+  const zone = document.getElementById("annonces");
+  zone.innerHTML = "";
 
-    // ⭐ Afficher les annonces sponsorisées en premier
-    annonces.sort((a, b) => {
-        if (a.sponsorise && !b.sponsorise) return -1;
-        if (!a.sponsorise && b.sponsorise) return 1;
-        return 0;
-    });
+  // ⭐ Afficher les annonces sponsorisées en premier
+  annonces.sort((a, b) => {
+    if (a.sponsorise === true && b.sponsorise !== true) return -1;
+    if (a.sponsorise !== true && b.sponsorise === true) return 1;
+    return 0;
+  });
 
-    if (annonces.length === 0) {
-      zone.innerHTML =
-        '<div class="aucune">Aucune annonce trouvée.</div>';
-      return;
+  if (annonces.length === 0) {
+    zone.innerHTML =
+      '<div class="aucune">Aucune annonce trouvée.</div>';
+    return;
+  }
+
+  annonces.forEach((annonce) => {
+    const div = document.createElement("div");
+    div.className = "annonce";
+
+    const nom = String(annonce.nom || "Sans nom");
+    const telephone = String(annonce.telephone || "");
+    const ville = String(annonce.ville || "Ville inconnue");
+    const prix =
+      Number(annonce.prix || 0).toLocaleString("fr-FR") + " GNF";
+
+    // Nom du produit
+    const titre = document.createElement("h3");
+    titre.textContent = nom;
+    div.appendChild(titre);
+
+    // ⭐ Badge sponsorisé
+    if (annonce.sponsorise === true) {
+      const badge = document.createElement("div");
+
+      badge.textContent = "⭐ ANNONCE SPONSORISÉE";
+      badge.style.background = "#fff3cd";
+      badge.style.color = "#856404";
+      badge.style.padding = "8px";
+      badge.style.borderRadius = "8px";
+      badge.style.fontWeight = "bold";
+      badge.style.textAlign = "center";
+      badge.style.marginBottom = "10px";
+
+      div.appendChild(badge);
     }
 
-    annonces.forEach((annonce) => {
-      const div = document.createElement("div");
-      div.className = "annonce";
+    // Photo du produit
+    if (annonce.imageUrl) {
+      const image = document.createElement("img");
 
-      const nom = String(annonce.nom || "Sans nom");
-      const telephone = String(annonce.telephone || "");
-      const ville = String(annonce.ville || "Ville inconnue");
-      const prix = Number(annonce.prix || 0).toLocaleString("fr-FR") + " GNF"; 
-      const titre = document.createElement("h3");
-      titre.textContent = nom;
-      div.appendChild(titre);
+      image.src = annonce.imageUrl;
+      image.alt = nom;
+      image.style.width = "100%";
+      image.style.maxHeight = "300px";
+      image.style.objectFit = "cover";
+      image.style.borderRadius = "10px";
+      image.style.marginBottom = "10px";
 
-      if (annonce.imageUrl) {
-        const image = document.createElement("img");
-        image.src = annonce.imageUrl;
-        image.alt = nom;
-        image.style.width = "100%";
-        image.style.maxHeight = "300px";
-        image.style.objectFit = "cover";
-        image.style.borderRadius = "10px";
-        image.style.marginBottom = "10px";
-        div.appendChild(image);
-      }
-        FR");
-      // ⭐ Badge pour les annonces sponsorisées
-if (annonce.sponsorise === true) {
-const badge = document.createElement(“div”);
-badge.textContent = “⭐ ANNONCE SPONSORISÉE”;
-badge.style.background = “#fff3cd”;
-badge.style.color = “#856404”;
-badge.style.padding = “8px”;
-badge.style.borderRadius = “8px”;
-badge.style.fontWeight = “bold”;
-badge.style.textAlign = “center”;
-badge.style.marginBottom = “10px”;
-div.appendChild(badge);
+      div.appendChild(image);
+    }
+
+    // Prix
+    const prixDiv = document.createElement("div");
+    prixDiv.className = "prix";
+    prixDiv.textContent = prix;
+    div.appendChild(prixDiv);
+
+    // Ville
+    const villeDiv = document.createElement("div");
+    villeDiv.className = "ville";
+    villeDiv.textContent = "📍 " + ville;
+    div.appendChild(villeDiv);
+
+    // Vérifier si le vendeur connecté possède cette annonce
+    const estProprietaire =
+      auth.currentUser &&
+      annonce.vendeurId === auth.currentUser.uid;
+
+    // Boutons Modifier et Supprimer
+    if (estProprietaire) {
+      const actions = document.createElement("div");
+
+      actions.style.display = "flex";
+      actions.style.gap = "10px";
+      actions.style.marginTop = "12px";
+
+      const boutonModifier = document.createElement("button");
+      boutonModifier.textContent = "✏️ Modifier";
+      boutonModifier.style.flex = "1";
+      boutonModifier.onclick = () => modifierAnnonce(annonce);
+
+      const boutonSupprimer = document.createElement("button");
+      boutonSupprimer.textContent = "🗑️ Supprimer";
+      boutonSupprimer.style.flex = "1";
+      boutonSupprimer.style.background = "#c62828";
+      boutonSupprimer.onclick = () => supprimerAnnonce(annonce);
+
+      actions.appendChild(boutonModifier);
+      actions.appendChild(boutonSupprimer);
+      div.appendChild(actions);
+    }
+
+    // Téléphone et WhatsApp
+    if (telephone) {
+      const numero = document.createElement("p");
+      numero.textContent = "📞 " + telephone;
+      div.appendChild(numero);
+
+      const boutonsContact = document.createElement("div");
+
+      boutonsContact.style.display = "flex";
+      boutonsContact.style.gap = "10px";
+      boutonsContact.style.marginTop = "10px";
+
+      const appel = document.createElement("a");
+      appel.href = "tel:" + telephone;
+      appel.textContent = "📞 Appeler";
+      appel.style.cssText =
+        "flex:1;background:#0a8f3d;color:white;padding:12px;" +
+        "border-radius:8px;text-align:center;text-decoration:none;" +
+        "font-weight:bold;";
+
+      const whatsapp = document.createElement("a");
+      whatsapp.href =
+        "https://wa.me/" + telephone.replace(/\D/g, "");
+      whatsapp.target = "_blank";
+      whatsapp.rel = "noopener noreferrer";
+      whatsapp.textContent = "💬 WhatsApp";
+      whatsapp.style.cssText =
+        "flex:1;background:#25D366;color:white;padding:12px;" +
+        "border-radius:8px;text-align:center;text-decoration:none;" +
+        "font-weight:bold;";
+
+      boutonsContact.appendChild(appel);
+      boutonsContact.appendChild(whatsapp);
+      div.appendChild(boutonsContact);
+    }
+
+    // ⭐ Bouton Sponsoriser : visible uniquement par le propriétaire
+    if (estProprietaire) {
+      const boutonSponsoriser = document.createElement("button");
+
+      boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
+      boutonSponsoriser.style.width = "100%";
+      boutonSponsoriser.style.marginTop = "10px";
+      boutonSponsoriser.style.background = "#f0b429";
+      boutonSponsoriser.style.color = "#222";
+      boutonSponsoriser.style.fontWeight = "bold";
+
+      boutonSponsoriser.onclick = () => {
+        alert(
+          "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
+          "7 jours : 10 000 GNF\n" +
+          "15 jours : 20 000 GNF\n" +
+          "30 jours : 50 000 GNF\n\n" +
+          "Le paiement sera bientôt disponible."
+        );
+      };
+
+      div.appendChild(boutonSponsoriser);
+    }
+
+    // Ajouter l'annonce à la page
+    zone.appendChild(div);
+  });
 }
-      const prixDiv = document.createElement("div");
-      prixDiv.className = "prix";
-      prixDiv.textContent = prix + " GNF";
-      div.appendChild(prixDiv);
-
-      const villeDiv = document.createElement("div");
-      villeDiv.className = "ville";
-      villeDiv.textContent = "📍 " + ville;
-      div.appendChild(villeDiv);
-            // Boutons visibles uniquement pour le propriétaire connecté.
-      if (
-        auth.currentUser &&
-        annonce.vendeurId === auth.currentUser.uid
-      ) {
-        const actions = document.createElement("div");
-        actions.style.display = "flex";
-        actions.style.gap = "10px";
-        actions.style.marginTop = "12px";
-
-        const boutonModifier = document.createElement("button");
-        boutonModifier.textContent = "✏️ Modifier";
-        boutonModifier.style.flex = "1";
-
-        boutonModifier.onclick = () => modifierAnnonce(annonce);
-
-        const boutonSupprimer = document.createElement("button");
-        boutonSupprimer.textContent = "🗑️ Supprimer";
-        boutonSupprimer.style.flex = "1";
-        boutonSupprimer.style.background = "#c62828";
-
-        boutonSupprimer.onclick = () => supprimerAnnonce(annonce);
-
-        actions.appendChild(boutonModifier);
-        actions.appendChild(boutonSupprimer);
-        div.appendChild(actions);
-      }
-
-      if (telephone) {
-        const numero = document.createElement("p");
-        numero.textContent = "📞 " + telephone;
-        div.appendChild(numero);
-
-        const boutons = document.createElement("div");
-        boutons.style.display = "flex";
-        boutons.style.gap = "10px";
-        boutons.style.marginTop = "10px";
-
-        const appel = document.createElement("a");
-        appel.href = "tel:" + telephone;
-        appel.textContent = "📞 Appeler";
-        appel.style.cssText =
-          "flex:1;background:#0a8f3d;color:white;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold;";
-
-        const whatsapp = document.createElement("a");
-        whatsapp.href =
-          "https://wa.me/" + telephone.replace(/\D/g, "");
-        whatsapp.target = "_blank";
-        whatsapp.rel = "noopener noreferrer";
-        whatsapp.textContent = "💬 WhatsApp";
-        whatsapp.style.cssText =
-          "flex:1;background:#25D366;color:white;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:bold;";
-
-        boutons.appendChild(appel);
-        boutons.appendChild(whatsapp);
-        div.appendChild(boutons);
-      }
-     boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
-    boutonSponsoriser.style.width = "100%";
-    boutonSponsoriser.style.marginTop = "10px";
-    boutonSponsoriser.style.background = "#f0b429";
-    boutonSponsoriser.style.color = "#222";
-    boutonSponsoriser.style.fontWeight = "bold";
-
-    boutonSponsoriser.onclick = () => {
-      alert(
-        "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
-        "7 jours : 10 000 GNF\n" +
-        "15 jours : 20 000 GNF\n" +
-        "30 jours : 50 000 GNF\n\n" +
-        "Le paiement sera bientôt disponible."
-      );
-    };
-
-    div.appendChild(boutonSponsoriser);
-  }
-    boutonSponsoriser.textContent = "⭐ Sponsoriser mon annonce";
-
-    boutonSponsoriser.style.width = "100%";
-    boutonSponsoriser.style.marginTop = "10px";
-    boutonSponsoriser.style.background = "#f0b429";
-    boutonSponsoriser.style.color = "#222";
-    boutonSponsoriser.style.fontWeight = "bold";
-
-    boutonSponsoriser.onclick = () => {
-      alert(
-        "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
-        "7 jours : 10 000 GNF\n" +
-        "15 jours : 20 000 GNF\n" +
-        "30 jours : 50 000 GNF\n\n" +
-        "Le paiement sera bientôt disponible."
-      );
-    };
-
-    div.appendChild(boutonSponsoriser);
-  }
-      zone.appendChild(div);
-    });
-  }
    // MODIFIER UNE ANNONCE
   window.modifierAnnonce = async function(annonce) {
     const utilisateur = auth.currentUser;
