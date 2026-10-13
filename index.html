@@ -723,24 +723,58 @@ message.textContent = "❌ Erreur : " + error.message;
   };
   // Charger les annonces au démarrage.
   chargerAnnonces();
+// CHOISIR UNE FORMULE DE SPONSORISATION
 window.choisirDureeSponsorisation = function(idAnnonce) {
+
+  const utilisateur = auth.currentUser;
+
+  if (!utilisateur) {
+    alert("🔐 Connecte-toi pour sponsoriser une annonce.");
+    return;
+  }
+
+  const annonce = toutesLesAnnonces.find(
+    function(item) {
+      return item.id === idAnnonce;
+    }
+  );
+
+  if (!annonce) {
+    alert("❌ Annonce introuvable.");
+    return;
+  }
+
+  if (annonce.vendeurId !== utilisateur.uid) {
+    alert("⛔ Tu peux uniquement sponsoriser tes propres annonces.");
+    return;
+  }
+
   const choix = prompt(
-    "⭐ CHOISIS LA DURÉE DU SPONSORING\n\n" +
+    "⭐ SPONSORISER MON ANNONCE\n\n" +
     "1 - 7 jours : 10 000 GNF\n" +
     "2 - 15 jours : 20 000 GNF\n" +
     "3 - 30 jours : 50 000 GNF\n\n" +
     "Entre 1, 2 ou 3 :"
   );
 
-  const tarifs = {
-    "1": { jours: 7, prix: 10000 },
-    "2": { jours: 15, prix: 20000 },
-    "3": { jours: 30, prix: 50000 }
-  };
-
   if (choix === null) {
     return;
   }
+
+  const tarifs = {
+    "1": {
+      jours: 7,
+      prix: 10000
+    },
+    "2": {
+      jours: 15,
+      prix: 20000
+    },
+    "3": {
+      jours: 30,
+      prix: 50000
+    }
+  };
 
   const formule = tarifs[choix.trim()];
 
@@ -751,11 +785,16 @@ window.choisirDureeSponsorisation = function(idAnnonce) {
 
   alert(
     "✅ Formule sélectionnée !\n\n" +
+    "Annonce : " + annonce.nom + "\n" +
     "Durée : " + formule.jours + " jours\n" +
-    "Montant : " + formule.prix.toLocaleString("fr-FR") +
+    "Montant : " +
+    formule.prix.toLocaleString("fr-FR") +
     " GNF\n\n" +
-    "La prochaine étape sera de préparer le paiement Orange Money."
+    "⚠️ Aucun paiement n'a été effectué.\n" +
+    "Le sponsoring sera activé après la mise en place " +
+    "du paiement et la confirmation de la transaction."
   );
+
 };
 </script>
       
