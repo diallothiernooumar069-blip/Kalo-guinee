@@ -446,12 +446,34 @@ message.textContent = "❌ Erreur : " + error.message;
   const zone = document.getElementById("annonces");
   zone.innerHTML = "";
 
-  // ⭐ Afficher les annonces sponsorisées en premier
-  annonces.sort((a, b) => {
-    if (a.sponsorise === true && b.sponsorise !== true) return -1;
-    if (a.sponsorise !== true && b.sponsorise === true) return 1;
-    return 0;
-  });
+  // ⭐ Déterminer si le sponsoring est encore actif
+function sponsoringActif(annonce) {
+  if (
+    annonce.sponsorise !== true ||
+    !annonce.sponsorFin
+  ) {
+    return false;
+  }
+
+  let dateFin;
+
+  if (typeof annonce.sponsorFin.toDate === "function") {
+    dateFin = annonce.sponsorFin.toDate();
+  } else {
+    dateFin = new Date(annonce.sponsorFin);
+  }
+
+  return (
+    !Number.isNaN(dateFin.getTime()) &&
+    dateFin.getTime() > Date.now()
+  );
+}
+
+// ⭐ Afficher les annonces sponsorisées actives en premier
+annonces.sort((a, b) => {
+  return Number(sponsoringActif(b)) -
+         Number(sponsoringActif(a));
+});
 
   if (annonces.length === 0) {
     zone.innerHTML =
@@ -475,7 +497,7 @@ message.textContent = "❌ Erreur : " + error.message;
     div.appendChild(titre);
 
     // ⭐ Badge sponsorisé
-    if (annonce.sponsorise === true) {
+    if (sponsoringActif(annonce)) {
       const badge = document.createElement("div");
 
       badge.textContent = "⭐ ANNONCE SPONSORISÉE";
@@ -594,14 +616,8 @@ message.textContent = "❌ Erreur : " + error.message;
       boutonSponsoriser.style.fontWeight = "bold";
 
       boutonSponsoriser.onclick = () => {
-        alert(
-          "⭐ FORMULES KALO GUINÉE ⭐\n\n" +
-          "7 jours : 10 000 GNF\n" +
-          "15 jours : 20 000 GNF\n" +
-          "30 jours : 50 000 GNF\n\n" +
-          "Le paiement sera bientôt disponible."
-        );
-      };
+  window.choisirDureeSponsorisation(annonce.id);
+};
 
       div.appendChild(boutonSponsoriser);
     }
