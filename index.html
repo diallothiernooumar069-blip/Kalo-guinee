@@ -745,7 +745,7 @@ annonces.sort((a, b) => {
   // Charger les annonces au démarrage.
   chargerAnnonces();
 // CHOISIR UNE FORMULE DE SPONSORISATION
-window.choisirDureeSponsorisation = function(idAnnonce) {
+window.choisirDureeSponsorisation = async function(idAnnonce) {
 
   const utilisateur = auth.currentUser;
 
@@ -804,24 +804,44 @@ window.choisirDureeSponsorisation = function(idAnnonce) {
     return;
   }
 
+  // Enregistrer la demande de sponsoring
+  try {
+    await addDoc(collection(db, "demandesSponsorisation"), {
+      annonceId: annonce.id,
+      nomAnnonce: annonce.nom,
+      vendeurId: utilisateur.uid,
+      vendeurEmail: utilisateur.email || "",
+      duree: formule.jours,
+      prix: formule.prix,
+      statut: "en_attente",
+      dateDemande: new Date()
+    });
+
     const numeroOrangeMoney = "+224629343278";
 
-  alert(
-    "🇬🇳 KALO GUINÉE\n\n" +
-    "✅ Formule sélectionnée !\n\n" +
-    "Annonce : " + annonce.nom + "\n" +
-    "Durée : " + formule.jours + " jours\n" +
-    "Montant : " +
-    formule.prix.toLocaleString("fr-FR") +
-    " GNF\n\n" +
-    "📱 PAIEMENT ORANGE MONEY\n" +
-    "Numéro : " + numeroOrangeMoney + "\n\n" +
-    "Effectue le transfert du montant indiqué.\n" +
-    "Après le paiement, contacte le responsable " +
-    "pour faire vérifier la transaction.\n\n" +
-    "⚠️ Le sponsoring sera activé après vérification " +
-    "du paiement."
-  );
+    alert(
+      "🇬🇳 KALO GUINÉE\n\n" +
+      "✅ Demande de sponsoring enregistrée !\n\n" +
+      "Annonce : " + annonce.nom + "\n" +
+      "Durée : " + formule.jours + " jours\n" +
+      "Montant : " +
+      formule.prix.toLocaleString("fr-FR") +
+      " GNF\n\n" +
+      "📱 PAIEMENT ORANGE MONEY\n" +
+      "Numéro : " + numeroOrangeMoney + "\n\n" +
+      "Effectue le transfert du montant indiqué.\n" +
+      "Ta demande sera vérifiée après réception du paiement.\n\n" +
+      "⏳ Statut : EN ATTENTE DE PAIEMENT ET DE VÉRIFICATION."
+    );
+
+  } catch (error) {
+    console.error("Erreur de demande de sponsoring :", error);
+
+    alert(
+      "❌ Impossible d'enregistrer la demande.\n" +
+      "Vérifie ta connexion et les règles Firebase."
+    );
+  }
 };
 </script>
       
