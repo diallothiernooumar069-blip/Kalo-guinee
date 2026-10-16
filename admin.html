@@ -1,1 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — Kalo Guinée</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #0b7a3b;
+      color: white;
+      border-radius: 12px;
+    }
+    .box {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+    }
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: #0b7a3b;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+    .demande {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 10px;
+      overflow-wrap: anywhere;
+    }
+    .attente { color: #8a6500; font-weight: bold; }
+    .erreur { color: #b00020; }
+    .succes { color: #0b7a3b; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🇬🇳 Kalo Guinée</h1>
+    <p>Panneau d’administration</p>
+  </header>
 
+  <div class="box">
+    <h2>🔐 Connexion administrateur</h2>
+    <p>Connecte-toi avec le compte Firebase administrateur autorisé.</p>
+    <input id="email" type="email" placeholder="Adresse e-mail">
+    <input id="motDePasse" type="password" placeholder="Mot de passe">
+    <button id="connexion">Se connecter</button>
+    <button id="deconnexion">Se déconnecter</button>
+    <p id="message"></p>
+  </div>
+
+  <div class="box">
+    <h2>📋 Demandes de sponsoring</h2>
+    <button id="actualiser">Actualiser les demandes</button>
+    <div id="demandes">Connecte-toi pour consulter les demandes.</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, doc, getDoc,
+      updateDoc, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import {
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
+      authDomain: "kalo-guinee.firebaseapp.com",
+      projectId: "kalo-guinee",
+      storageBucket: "kalo-guinee.firebasestorage.app",
+      messagingSenderId: "21878004061",
+      appId: "1:21878004061:web:402d32ef967f0ceaaef0b4"
+    };
+
+    const app = initializeApp(firebaseConfig, "kalo-admin");
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const ADMIN_UID = "vf2po3yiqRf7kbaoS7EKXnWMDAt1";
+    const message = document.getElementById("message");
+    const zoneDemandes = document.getElementById("demandes");
+
+    function afficherMessage(texte, type = "") {
+      message.textContent = texte;
+      message.className = type;
+    }
+
+    function verifierAdmin() {
+      if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) {
+        zoneDemandes.textContent = "Accès réservé au compte administrateur autorisé.";
+        return false;
+      }
+      return true;
+    }
+
+    document.getElementById("connexion").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const motDePasse = document.getElementById("motDePasse").value;
+
+      if (!email || !motDePasse) {
+        afficherMessage("Entre ton e-mail et ton mot de passe.", "erreur");
+        return;
+      }
+
+      try {
+        const resultat = await signInWithEmailAndPassword(auth, email, motDePasse);
+        if (resultat.user.uid !== ADMIN_UID) {
+          await signOut(auth);
+          afficherMessage("Accès refusé : ce compte n’est pas administrateur.", "erreur");
+          return;
+        }
+        afficherMessage("Connexion administrateur réussie.", "succes");
+        await chargerDemandes();
+      } catch (error) {
+        console.error(error);
+        afficherMessage("Connexion impossible. Vérifie tes identifiants.", "erreur");
+      }
+    });
+
+    document.getElementById("deconnexion").addEventListener("click", async () => {
+      await signOut(auth);
+      zoneDemandes.textContent = "Connecte-toi pour consulter les demandes.";
+      afficherMessage("Tu es déconnecté.");
+    });
+
+    document.getElementById("actualiser").addEventListener("click", chargerDemandes);
+
+    onAuthStateChanged(auth, async (utilisateur) => {
+      if (!utilisateur) {
+        zoneDemandes.textContent = "Connecte-toi pour consulter les demandes.";
+        return;
+      }
+      if (utilisateur.uid !== ADMIN_UID) {
+        zoneDemandes.textContent = "Accès refusé.";
+        return;
+      }
+      await chargerDemandes();
+    });
+
+    async function chargerDemandes() {
+      if (!verifierAdmin()) return;
+
+      zoneDemandes.textContent = "Chargement…";
+
+      try {
+        const resultat = await getDocs(
+          query(collection(db, "demandesSponsorisation"), orderBy("dateDemande", "desc"))
+        );
+
+        zoneDemandes.innerHTML = "";
+
+        if (resultat.empty) {
+          zoneDemandes.textContent = "Aucune demande pour le moment.";
+          return;
+        }
+
+        resultat.forEach((documentDemande) => {
+          const demande = { id: documentDemande.id, ...documentDemande.data() };
+          const carte = document.createElement("div");
+          carte.className = "demande";
+
+          const titre = document.createElement("h3");
+          titre.textContent = demande.nomAnnonce || "Annonce sans nom";
+          carte.appendChild(titre);
+
+          const details = document.createElement("p");
+          details.textContent =
+            "Durée : " + demande.duree + " jours | Montant : " +
+            Number(demande.prix || 0).toLocaleString("fr-FR") + " GNF";
+          carte.appendChild(details);
+
+          const statut = document.createElement("p");
+          statut.textContent = "Statut : " + (demande.statut || "inconnu");
+          statut.className = demande.statut === "en_attente" ? "attente" : "succes";
+          carte.appendChild(statut);
+
+          const vendeur = document.createElement("p");
+          vendeur.textContent = "E-mail vendeur : " + (demande.vendeurEmail || "non renseigné");
+          carte.appendChild(vendeur);
+
+          const date = document.createElement("p");
+          const dateValue = demande.dateDemande?.toDate
+            ? demande.dateDemande.toDate().toLocaleString("fr-FR")
+            : "Date inconnue";
+          date.textContent = "Date de demande : " + dateValue;
+          carte.appendChild(date);
+
+          if (demande.statut === "en_attente") {
+            const bouton = document.createElement("button");
+            bouton.textContent = "Vérifier et approuver le paiement";
+            bouton.addEventListener("click", () => approuverDemande(demande));
+            carte.appendChild(bouton);
+          }
+
+          zoneDemandes.appendChild(carte);
+        });
+      } catch (error) {
+        console.error(error);
+        zoneDemandes.textContent =
+          "Impossible de charger les demandes. Vérifie les règles Firestore.";
+      }
+    }
+
+    async function approuverDemande(demande) {
+      if (!verifierAdmin()) return;
+
+      const confirmation = confirm(
+        "As-tu réellement vérifié que le paiement Orange Money de " +
+        Number(demande.prix).toLocaleString("fr-FR") +
+        " GNF a été reçu ?\n\nN'approuve pas si le paiement n'est pas confirmé."
+      );
+      if (!confirmation) return;
+
+      const annonceRef = doc(db, "annonces", demande.annonceId);
+      const demandeRef = doc(db, "demandesSponsorisation", demande.id);
+
+      try {
+        const annonceSnap = await getDoc(annonceRef);
+        if (!annonceSnap.exists()) {
+          alert("Annonce introuvable. La demande ne sera pas approuvée.");
+          return;
+        }
+
+        const annonce = annonceSnap.data();
+        if (annonce.vendeurId !== demande.vendeurId) {
+          alert("Le propriétaire de l'annonce ne correspond pas à la demande.");
+          return;
+        }
+
+        const dureesAutorisees = {
+          7: 10000,
+          15: 20000,
+          30: 50000
+        };
+
+        if (dureesAutorisees[demande.duree] !== demande.prix) {
+          alert("La durée et le prix de cette demande ne correspondent pas.");
+          return;
+        }
+
+        if (demande.statut !== "en_attente") {
+          alert("Cette demande n'est plus en attente.");
+          return;
+        }
+
+        const debut = new Date();
+        const fin = new Date(debut);
+        fin.setDate(fin.getDate() + Number(demande.duree));
+
+        await updateDoc(annonceRef, {
+          sponsorise: true,
+          sponsorDuree: Number(demande.duree),
+          sponsorPrix: Number(demande.prix),
+          sponsorDebut: debut,
+          sponsorFin: fin
+        });
+
+        await updateDoc(demandeRef, {
+          statut: "approuve",
+          dateValidation: serverTimestamp()
+        });
+
+        alert("Sponsoring activé pour " + demande.duree + " jours !");
+        await chargerDemandes();
+      } catch (error) {
+        console.error(error);
+        alert("Erreur pendant l'approbation. Vérifie les règles Firestore.");
+      }
+    }
+  </script>
+</body>
+</html
