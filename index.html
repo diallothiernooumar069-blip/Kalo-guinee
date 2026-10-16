@@ -804,19 +804,24 @@ window.choisirDureeSponsorisation = function(idAnnonce) {
     return;
   }
 
+    const numeroOrangeMoney = "+224629343278";
+
   alert(
+    "🇬🇳 KALO GUINÉE\n\n" +
     "✅ Formule sélectionnée !\n\n" +
     "Annonce : " + annonce.nom + "\n" +
     "Durée : " + formule.jours + " jours\n" +
     "Montant : " +
     formule.prix.toLocaleString("fr-FR") +
     " GNF\n\n" +
-    "⚠️ Aucun paiement n'a été effectué.\n" +
-    "Le sponsoring sera activé après la mise en place " +
-    "du paiement et la confirmation de la transaction."
+    "📱 PAIEMENT ORANGE MONEY\n" +
+    "Numéro : " + numeroOrangeMoney + "\n\n" +
+    "Effectue le transfert du montant indiqué.\n" +
+    "Après le paiement, contacte le responsable " +
+    "pour faire vérifier la transaction.\n\n" +
+    "⚠️ Le sponsoring sera activé après vérification " +
+    "du paiement."
   );
-
-};
 </script>
       
 
