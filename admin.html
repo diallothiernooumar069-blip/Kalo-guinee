@@ -78,17 +78,27 @@
 
   <script type="module">
     import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+
+import {
   getFirestore,
   collection,
   getDocs,
   doc,
   getDoc,
-  updateDoc,
   query,
   orderBy,
   serverTimestamp,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
