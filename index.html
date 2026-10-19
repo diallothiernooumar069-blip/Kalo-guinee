@@ -744,7 +744,7 @@ annonces.sort((a, b) => {
   // Charger les annonces au démarrage.
   chargerAnnonces();
 // CHOISIR UNE FORMULE DE SPONSORISATION
-window.choisirDureeSponsorisation = async function(idAnnonce) {
+DureeSponsorisation = async function(idAnnonce) {
 
   const utilisateur = auth.currentUser;
 
@@ -769,53 +769,67 @@ window.choisirDureeSponsorisation = async function(idAnnonce) {
     return;
   }
 
-  const choix = prompt(
-    "⭐ SPONSORISER MON ANNONCE\n\n" +
-    "1 - 7 jours : 10 000 GNF\n" +
-    "2 - 15 jours : 20 000 GNF\n" +
-    "3 - 30 jours : 50 000 GNF\n\n" +
-    "Entre 1, 2 ou 3 :"
-  );
-
-  if (choix === null) {
-    return;
-  }
-
-  const tarifs = {
-    "1": {
-      jours: 7,
-      prix: 10000
-    },
-    "2": {
-      jours: 15,
-      prix: 20000
-    },
-    "3": {
-      jours: 30,
-      prix: 50000
-    }
-  };
-
-  const formule = tarifs[choix.trim()];
-
-  if (!formule) {
-    alert("❌ Choix invalide. Entre 1, 2 ou 3.");
-    return;
-  }
-
-  // Enregistrer la demande de sponsoring
   try {
+
+    // Vérifier si une demande est déjà en attente pour cette annonce
+    const demandesExistantes = await getDocs(
+      collection(db, "demandesSponsorisation")
+    );
+
+    const demandeEnAttente = demandesExistantes.docs.some(
+      function(documentDemande) {
+        const demande = documentDemande.data();
+
+        return demande.annonceId === annonce.id &&
+               demande.vendeurId === utilisateur.uid &&
+               demande.statut === "en_attente";
+      }
+    );
+
+    if (demandeEnAttente) {
+      alert(
+        "⏳ Une demande de sponsoring est déjà en attente pour cette annonce.\n\n" +
+        "Attends la vérification du paiement avant de faire une nouvelle demande."
+      );
+      return;
+    }
+
+    const choix = prompt(
+      "⭐ SPONSORISER MON ANNONCE\n\n" +
+      "1 - 7 jours : 10 000 GNF\n" +
+      "2 - 15 jours : 20 000 GNF\n" +
+      "3 - 30 jours : 50 000 GNF\n\n" +
+      "Tu peux renouveler avant ou après l'expiration.\n\n" +
+      "Entre 1, 2 ou 3 :"
+    );
+
+    if (choix === null) {
+      return;
+    }
+
+    const tarifs = {
+      "1": { jours: 7, prix: 10000 },
+      "2": { jours: 15, prix: 20000 },
+      "3": { jours: 30, prix: 50000 }
+    };
+
+    const formule = tarifs[choix.trim()];
+
+    if (!formule) {
+      alert("❌ Choix invalide. Entre 1, 2 ou 3.");
+      return;
+    }
+
     await addDoc(collection(db, "demandesSponsorisation"), {
       annonceId: annonce.id,
       nomAnnonce: annonce.nom,
       vendeurId: utilisateur.uid,
+      vendeurEmail: utilisateur.email || "",
       duree: formule.jours,
       prix: formule.prix,
       statut: "en_attente",
       dateDemande: new Date()
     });
-
-    const numeroOrangeMoney = "+224629343278";
 
     alert(
       "🇬🇳 KALO GUINÉE\n\n" +
@@ -826,10 +840,10 @@ window.choisirDureeSponsorisation = async function(idAnnonce) {
       formule.prix.toLocaleString("fr-FR") +
       " GNF\n\n" +
       "📱 PAIEMENT ORANGE MONEY\n" +
-      "Numéro : " + numeroOrangeMoney + "\n\n" +
+      "Numéro : +224629343278\n\n" +
       "Effectue le transfert du montant indiqué.\n" +
-      "Ta demande sera vérifiée après réception du paiement.\n\n" +
-      "⏳ Statut : EN ATTENTE DE PAIEMENT ET DE VÉRIFICATION."
+      "Ton annonce sera sponsorisée après vérification du paiement par l'administration.\n\n" +
+      "⏳ Statut : EN ATTENTE."
     );
 
   } catch (error) {
