@@ -77,14 +77,18 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import {
-      getFirestore, collection, getDocs, doc, getDoc,
-      updateDoc, query, orderBy, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-    import {
-      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+  query,
+  orderBy,
+  serverTimestamp,
+  writeBatch
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBpt3SFlC8uHi59v4_wd8HiVN-ZhqgMFPk",
@@ -225,71 +229,135 @@
     }
 
     async function approuverDemande(demande) {
-      if (!verifierAdmin()) return;
+  if (!verifierAdmin()) return;
 
-      const confirmation = confirm(
-        "As-tu réellement vérifié que le paiement Orange Money de " +
-        Number(demande.prix).toLocaleString("fr-FR") +
-        " GNF a été reçu ?\n\nN'approuve pas si le paiement n'est pas confirmé."
-      );
-      if (!confirmation) return;
+  if (demande.statut !== "en_attente") {
+    alert("Cette demande n'est plus en attente.");
+    return;
+  }
 
-      const annonceRef = doc(db, "annonces", demande.annonceId);
-      const demandeRef = doc(db, "demandesSponsorisation", demande.id);
+  const dureesAutorisees = {
+    7: 10000,
+    15: 20000,
+    30: 50000
+  };
 
-      try {
-        const annonceSnap = await getDoc(annonceRef);
-        if (!annonceSnap.exists()) {
-          alert("Annonce introuvable. La demande ne sera pas approuvée.");
-          return;
-        }
+  const duree = Number(demande.duree);
+  const prix = Number(demande.prix);
 
-        const annonce = annonceSnap.data();
-        if (annonce.vendeurId !== demande.vendeurId) {
-          alert("Le propriétaire de l'annonce ne correspond pas à la demande.");
-          return;
-        }
+  if (dureesAutorisees[duree] !== prix) {
+    alert("La durée et le prix de cette demande ne correspondent pas.");
+    return;
+  }
 
-        const dureesAutorisees = {
-          7: 10000,
-          15: 20000,
-          30: 50000
-        };
+  const confirmation = confirm(
+    "As-tu réellement vérifié que le paiement Orange Money de " +
+    prix.toLocaleString("fr-FR") +
+    " GNF a été reçu ?\n\n" +
+    "N'approuve pas si le paiement n'est pas confirmé."
+  );
 
-        if (dureesAutorisees[demande.duree] !== demande.prix) {
-          alert("La durée et le prix de cette demande ne correspondent pas.");
-          return;
-        }
+  if (!confirmation) return;
 
-        if (demande.statut !== "en_attente") {
-          alert("Cette demande n'est plus en attente.");
-          return;
-        }
+  const annonceRef = doc(db, "annonces", demande.annonceId);
+  const demandeRef = doc(db, "demandesSponsorisation", demande.id);
 
-        const debut = new Date();
-        const fin = new Date(debut);
-        fin.setDate(fin.getDate() + Number(demande.duree));
+  try {
+    // Vérifier l'annonce et la demande avant de les modifier
+    const annonceSnap = await getDoc(annonceRef);
+    const demandeSnap = await getDoc(demandeRef);
 
-        await updateDoc(annonceRef, {
-          sponsorise: true,
-          sponsorDuree: Number(demande.duree),
-          sponsorPrix: Number(demande.prix),
-          sponsorDebut: debut,
-          sponsorFin: fin
-        });
+    if (!annonceSnap.exists()) {
+      alert("Annonce introuvable. La demande ne sera pas approuvée.");
+      return;
+    }
 
-        await updateDoc(demandeRef, {
-          statut: "approuve",
-          dateValidation: serverTimestamp()
-        });
+    if (!demandeSnap.exists()) {
+      alert("Demande introuvable.");
+      return;
+    }
 
-        alert("Sponsoring activé pour " + demande.duree + " jours !");
-        await chargerDemandes();
-      } catch (error) {
-        console.error(error);
-        alert("Erreur pendant l'approbation. Vérifie les règles Firestore.");
+    const annonce = annonceSnap.data();
+    const demandeActuelle = demandeSnap.data();
+
+    if (annonce.vendeurId !== demande.vendeurId) {
+      alert("Le propriétaire de l'annonce ne correspond pas à la demande.");
+      return;
+    }
+
+    if (
+      demandeActuelle.statut !== "en_attente" ||
+      demandeActuelle.annonceId !== demande.annonceId ||
+      demandeActuelle.vendeurId !== demande.vendeurId ||
+      Number(demandeActuelle.duree) !== duree ||
+      Number(demandeActuelle.prix) !== prix
+    ) {
+      alert("La demande a changé ou a déjà été traitée. Actualise la page.");
+      await chargerDemandes();
+      return;
+    }
+
+    // Préserver les jours restants lors d'un renouvellement
+    const maintenant = new Date();
+    let debut = maintenant;
+
+    if (annonce.sponsorise === true && annonce.sponsorFin) {
+      let ancienneFin;
+
+      if (typeof annonce.sponsorFin.toDate === "function") {
+        ancienneFin = annonce.sponsorFin.toDate();
+      } else {
+        ancienneFin = new Date(annonce.sponsorFin);
+      }
+
+      if (
+        !Number.isNaN(ancienneFin.getTime()) &&
+        ancienneFin > maintenant
+      ) {
+        debut = ancienneFin;
       }
     }
+
+    const fin = new Date(
+      debut.getTime() + duree * 24 * 60 * 60 * 1000
+    );
+
+    // Préparer les deux modifications dans une seule opération atomique
+    const lot = writeBatch(db);
+
+    lot.update(annonceRef, {
+      sponsorise: true,
+      sponsorDuree: duree,
+      sponsorPrix: prix,
+      sponsorDebut: debut,
+      sponsorFin: fin
+    });
+
+    lot.update(demandeRef, {
+      statut: "approuve",
+      dateValidation: serverTimestamp()
+    });
+
+    await lot.commit();
+
+    alert(
+      "✅ Sponsoring activé !\n\n" +
+      "Durée ajoutée : " + duree + " jours\n" +
+      "Prix : " + prix.toLocaleString("fr-FR") + " GNF\n" +
+      "Nouvelle date de fin : " + fin.toLocaleString("fr-FR")
+    );
+
+    await chargerDemandes();
+
+  } catch (error) {
+    console.error("Erreur pendant l'approbation :", error);
+
+    alert(
+      "❌ Erreur pendant l'approbation.\n\n" +
+      "Vérifie les règles Firestore et actualise la page avant de réessayer."
+    );
+  }
+}
   </script>
 </body>
-</html
+</html>
