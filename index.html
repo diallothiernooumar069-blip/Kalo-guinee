@@ -474,7 +474,7 @@ function sponsoringActif(annonce) {
 }
 
 // ⭐ Afficher les annonces sponsorisées actives en premier
-annonces.sort((a, b) => {
+annonces = [...annonces].sort((a, b) => {
   return Number(sponsoringActif(b)) -
          Number(sponsoringActif(a));
 });
