@@ -91,6 +91,11 @@
 
   <button id="actualiserStatistiques">
     Actualiser les statistiques
+   <h3>📈 Évolution des recettes sur 12 mois</h3>
+
+<div style="width:100%; max-width:800px; margin:20px auto;">
+  <canvas id="graphiqueRecettes"></canvas>
+</div> 
   </button>
 </div>
   <h3 id="totalRecettes">Total reçu : 0 GNF</h3>
@@ -105,6 +110,7 @@
     Connecte-toi pour consulter les paiements.
   </div>
 </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import {
   initializeApp
@@ -441,6 +447,91 @@ async function chargerHistorique() {
     zoneAnnee.textContent = "Erreur de chargement";
   }
 } 
+    let graphiqueRecettes = null;
+
+async function chargerGraphiqueRecettes() {
+  try {
+    const resultat = await getDocs(
+      collection(db, "demandesSponsorisation")
+    );
+
+    const maintenant = new Date();
+    const recettes = Array(12).fill(0);
+    const labels = [];
+
+    // Préparer les 12 derniers mois
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(
+        maintenant.getFullYear(),
+        maintenant.getMonth() - i,
+        1
+      );
+
+      labels.push(
+        date.toLocaleDateString("fr-FR", {
+          month: "short",
+          year: "numeric"
+        })
+      );
+    }
+
+    resultat.forEach((document) => {
+      const paiement = document.data();
+
+      if (
+        paiement.statut !== "approuve" ||
+        !paiement.dateValidation
+      ) return;
+
+      const datePaiement =
+        typeof paiement.dateValidation.toDate === "function"
+          ? paiement.dateValidation.toDate()
+          : new Date(paiement.dateValidation);
+
+      const difference =
+        (maintenant.getFullYear() - datePaiement.getFullYear()) * 12 +
+        maintenant.getMonth() - datePaiement.getMonth();
+
+      if (difference >= 0 && difference < 12) {
+        recettes[11 - difference] += Number(paiement.prix) || 0;
+      }
+    });
+
+    const canvas = document.getElementById("graphiqueRecettes");
+
+    if (graphiqueRecettes) {
+      graphiqueRecettes.destroy();
+    }
+
+    graphiqueRecettes = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Recettes en GNF",
+          data: recettes,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString("fr-FR") + " GNF";
+              }
+            }
+          }
+        }
+      }
+    });
+
+  } catch (erreur) {
+    console.error("Erreur graphique :", erreur);
+  }
+}
     async function approuverDemande(demande) {
   if (!verifierAdmin()) return;
 
@@ -563,7 +654,7 @@ async function chargerHistorique() {
     await chargerDemandes();
     await chargerHistorique();
     await chargerStatistiques();
-
+    await chargerGraphiqueRecettes();
   } catch (error) {
     console.error("Erreur pendant l'approbation :", error);
 
