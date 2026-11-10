@@ -77,7 +77,22 @@
   </div>
    <div class="box">
   <h2>💰 Historique des paiements</h2>
+  <div class="box">
+  <h2>📊 Tableau de bord financier</h2>
 
+  <h3>💰 Recettes du jour</h3>
+  <p id="recettesJour">0 GNF</p>
+
+  <h3>📅 Recettes du mois</h3>
+  <p id="recettesMois">0 GNF</p>
+
+  <h3>📈 Recettes de l'année</h3>
+  <p id="recettesAnnee">0 GNF</p>
+
+  <button id="actualiserStatistiques">
+    Actualiser les statistiques
+  </button>
+</div>
   <h3 id="totalRecettes">Total reçu : 0 GNF</h3>
 
   <p id="nombrePaiements">Paiements confirmés : 0</p>
@@ -177,6 +192,8 @@ import {
     document.getElementById("actualiser").addEventListener("click", chargerDemandes);
     document.getElementById("actualiserHistorique")
   .addEventListener("click", chargerHistorique);
+   document.getElementById("actualiserStatistiques")
+  .addEventListener("click", chargerStatistiques); 
     onAuthStateChanged(auth, async (utilisateur) => {
       if (!utilisateur) {
         zoneDemandes.textContent = "Connecte-toi pour consulter les demandes.";
@@ -357,6 +374,73 @@ async function chargerHistorique() {
 
   }
 }
+   async function chargerStatistiques() {
+  const zoneJour = document.getElementById("recettesJour");
+  const zoneMois = document.getElementById("recettesMois");
+  const zoneAnnee = document.getElementById("recettesAnnee");
+
+  try {
+    const resultat = await getDocs(
+      collection(db, "demandesSponsorisation")
+    );
+
+    const maintenant = new Date();
+
+    let totalJour = 0;
+    let totalMois = 0;
+    let totalAnnee = 0;
+
+    resultat.forEach((document) => {
+      const paiement = document.data();
+
+      if (paiement.statut !== "approuve") return;
+
+      if (!paiement.dateValidation) return;
+
+      const datePaiement =
+        typeof paiement.dateValidation.toDate === "function"
+          ? paiement.dateValidation.toDate()
+          : new Date(paiement.dateValidation);
+
+      const prix = Number(paiement.prix) || 0;
+
+      // Recettes du jour
+      if (
+        datePaiement.getDate() === maintenant.getDate() &&
+        datePaiement.getMonth() === maintenant.getMonth() &&
+        datePaiement.getFullYear() === maintenant.getFullYear()
+      ) {
+        totalJour += prix;
+      }
+
+      // Recettes du mois
+      if (
+        datePaiement.getMonth() === maintenant.getMonth() &&
+        datePaiement.getFullYear() === maintenant.getFullYear()
+      ) {
+        totalMois += prix;
+      }
+
+      // Recettes de l'année
+      if (datePaiement.getFullYear() === maintenant.getFullYear()) {
+        totalAnnee += prix;
+      }
+    });
+
+    const formatPrix = (prix) =>
+      prix.toLocaleString("fr-FR") + " GNF";
+
+    zoneJour.textContent = formatPrix(totalJour);
+    zoneMois.textContent = formatPrix(totalMois);
+    zoneAnnee.textContent = formatPrix(totalAnnee);
+
+  } catch (erreur) {
+    console.error("Erreur statistiques :", erreur);
+    zoneJour.textContent = "Erreur de chargement";
+    zoneMois.textContent = "Erreur de chargement";
+    zoneAnnee.textContent = "Erreur de chargement";
+  }
+} 
     async function approuverDemande(demande) {
   if (!verifierAdmin()) return;
 
@@ -477,7 +561,8 @@ async function chargerHistorique() {
     );
 
     await chargerDemandes();
-  await chargerHistorique();
+    await chargerHistorique();
+    await chargerStatistiques();
 
   } catch (error) {
     console.error("Erreur pendant l'approbation :", error);
