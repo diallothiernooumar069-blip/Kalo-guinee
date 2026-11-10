@@ -204,7 +204,9 @@
   getDocs,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
   import {
@@ -773,8 +775,11 @@ window.choisirDureeSponsorisation = async function(idAnnonce) {
 
     // Vérifier si une demande est déjà en attente pour cette annonce
     const demandesExistantes = await getDocs(
-      collection(db, "demandesSponsorisation")
-    );
+  query(
+    collection(db, "demandesSponsorisation"),
+    where("vendeurId", "==", utilisateur.uid)
+  )
+);
 
     const demandeEnAttente = demandesExistantes.docs.some(
       function(documentDemande) {
